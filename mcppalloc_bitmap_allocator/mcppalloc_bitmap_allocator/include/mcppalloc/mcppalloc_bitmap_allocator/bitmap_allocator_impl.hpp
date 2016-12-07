@@ -26,7 +26,7 @@ namespace mcppalloc
       template <typename Allocator_Policy>
       bitmap_allocator_t<Allocator_Policy>::bitmap_allocator_t(size_t size, size_t size_hint) : m_slab(size, size_hint)
       {
-        m_thread_allocator_by_manager_id.resize(gsl::narrow<size_t>(mcpputil::thread_id_manager_t::gs().current_thread_id()));
+        m_thread_allocator_by_manager_id.resize(gsl::narrow<size_t>(mcpputil::thread_id_manager_t::gs().max_threads()));
         for (auto &&ptr : m_thread_allocator_by_manager_id)
           ptr = nullptr;
         m_slab.align_next(c_bitmap_block_size);
@@ -55,8 +55,8 @@ namespace mcppalloc
       template <typename Allocator_Policy>
       auto bitmap_allocator_t<Allocator_Policy>::get_ttla() noexcept -> thread_allocator_type *
       {
-        return m_thread_allocator_by_manager_id[::gsl::narrow_cast<size_t>(
-            mcpputil::thread_id_manager_t::gs().current_thread_id())];
+        auto id = mcpputil::thread_id_manager_t::gs().current_thread_id();
+        return m_thread_allocator_by_manager_id[::gsl::narrow_cast<size_t>(id)];
       }
       template <typename Allocator_Policy>
       void bitmap_allocator_t<Allocator_Policy>::set_ttla(thread_allocator_type *ta) noexcept
