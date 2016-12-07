@@ -85,6 +85,9 @@ namespace mcppalloc
       bitmap_state_info_t bitmap_package_t<Allocator_Policy>::_get_info(size_t id, type_id_t type_id)
       {
         using namespace mcpputil::literals;
+        if (mcpputil_unlikely(id >= cs_num_vectors)) {
+          throw ::std::runtime_error("bitmap package state id exceeds number possible 9b95cfb2-fa7d-4878-9cd7-cab0bc87b321");
+        }
         bitmap_state_t state;
         state.m_internal.m_info = bitmap_state_info_t{static_cast<uint32_t>(cs_total_size / ((1 + id) << 5) / 512),
                                                       (1u << (5 + id)),
