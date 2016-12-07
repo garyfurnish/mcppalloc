@@ -8,18 +8,6 @@ using bitmap_allocator =
 template <>
 ::std::vector<bitmap_allocator::thread_allocator_type *> bitmap_allocator::m_thread_allocator_by_manager_id{};
 
-#ifdef __APPLE__
-template <>
-pthread_key_t mcpputil::thread_local_pointer_t<mcppalloc::bitmap_allocator::details::bitmap_thread_allocator_t<
-    mcppalloc::default_allocator_policy_t<::std::allocator<void>>>>::s_pkey{0};
-#else
-template <>
-thread_local mcpputil::thread_local_pointer_t<mcppalloc::bitmap_allocator::details::bitmap_thread_allocator_t<
-    mcppalloc::default_allocator_policy_t<::std::allocator<void>>>>::pointer_type
-    mcpputil::thread_local_pointer_t<mcppalloc::bitmap_allocator::details::bitmap_thread_allocator_t<
-        mcppalloc::default_allocator_policy_t<::std::allocator<void>>>>::s_tlks = nullptr;
-#endif
-
 using namespace bandit;
 
 using namespace ::mcpputil::literals;
