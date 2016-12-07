@@ -2,6 +2,12 @@
 #include <mcppalloc/mcppalloc_slab_allocator/slab_allocator.hpp>
 #include <mcpputil/mcpputil/bandit.hpp>
 #include <mcpputil/mcpputil/security.hpp>
+
+using bitmap_allocator =
+    mcppalloc::bitmap_allocator::details::bitmap_allocator_t<mcppalloc::default_allocator_policy_t<std::allocator<void>>>;
+template <>
+::std::vector<bitmap_allocator::thread_allocator_type *> bitmap_allocator::m_thread_allocator_by_manager_id{};
+
 #ifdef __APPLE__
 template <>
 pthread_key_t mcpputil::thread_local_pointer_t<mcppalloc::bitmap_allocator::details::bitmap_thread_allocator_t<
@@ -295,7 +301,8 @@ void exhaustive_test()
         }
       }
       ptrs.push_back(v);
-    } catch (::std::bad_alloc) {
+    } catch (::std::bad_alloc &) {
+      // Do nothing
     }
   } while (v != nullptr);
   for (auto &&ptr : ptrs) {
@@ -305,6 +312,11 @@ void exhaustive_test()
 
 void bitmap_allocator_tests()
 {
+  auto manager = ::std::make_unique<mcpputil::thread_id_manager_t>();
+  manager->set_max_threads(10);
+  manager->set_max_tls_pointers(10);
+  manager.release();
+  mcpputil::thread_id_manager_t::gs().add_current_thread();
   describe("bitmap_tests", []() {
     it("bitmap_state_test0", []() { bitmap_state_test0(); });
     it("multiple_slab_test0", []() { multiple_slab_test0(); });
