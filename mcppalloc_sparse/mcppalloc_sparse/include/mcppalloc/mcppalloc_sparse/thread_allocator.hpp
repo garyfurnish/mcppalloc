@@ -203,8 +203,9 @@ namespace mcppalloc::sparse::details
   private:
     /**
      * \brief Free empty blocks, but only if necessary.
+     * @return True if blocks freed, false otherwise.
      **/
-    void _check_do_free_empty_blocks();
+    auto _check_do_free_empty_blocks() -> bool;
     /**
      * \brief Free empty blocks, but only if necessary.
      * @param allocator Allocator to condition on.

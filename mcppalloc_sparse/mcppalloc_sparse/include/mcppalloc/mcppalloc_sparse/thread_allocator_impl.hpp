@@ -180,7 +180,7 @@ namespace mcppalloc::sparse::details
     return destroy(v);
   }
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
-  void thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::_check_do_free_empty_blocks()
+  auto thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::_check_do_free_empty_blocks() -> bool
   {
     // do book keeping for returning memory to global.
     // do this if we exceed the destroy threshold or externally forced.
@@ -188,17 +188,18 @@ namespace mcppalloc::sparse::details
 
     if (mcpputil_unlikely(should_force_free)) {
       _do_free_empty_blocks();
+      return true;
     }
+    return false;
   }
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
   void thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::_check_do_free_empty_blocks(
       this_allocator_block_set_t &allocator)
   {
-    // do book keeping for returning memory to global.
-    // do this if we exceed the destroy threshold or externally forced.
-    bool should_force_free = m_force_free_empty_blocks.load(::std::memory_order_relaxed);
-
-    if (should_force_free || allocator.num_destroyed_since_last_free() > destroy_threshold()) {
+    if (_check_do_free_empty_blocks()) {
+      return;
+    }
+    if (allocator.num_destroyed_since_last_free() > destroy_threshold()) {
       _do_free_empty_blocks();
     }
   }
