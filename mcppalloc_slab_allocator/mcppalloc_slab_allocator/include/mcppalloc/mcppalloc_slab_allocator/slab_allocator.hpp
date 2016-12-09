@@ -7,6 +7,7 @@
 #include <mcpputil/mcpputil/backed_ordered_map.hpp>
 #include <mcpputil/mcpputil/concurrency.hpp>
 #include <mcpputil/mcpputil/function_iterator.hpp>
+#include <mcpputil/mcpputil/memory_range.hpp>
 #include <mcpputil/mcpputil/posix_slab.hpp>
 #include <mcpputil/mcpputil/win32_slab.hpp>
 namespace mcppalloc::slab_allocator::details
@@ -25,7 +26,15 @@ namespace mcppalloc::slab_allocator::details
   class slab_allocator_t
   {
   public:
-    //    static constexpr const size_t cs_alignment = 32;
+    /**
+     * \brief Type of pointer for slab allocator.
+     **/
+    using pointer_type = uint8_t *;
+    /**
+     * \brief Type of memory range.
+     **/
+    using memory_range_type = mcpputil::memory_range_t<pointer_type>;
+
     static inline constexpr const size_t cs_alignment = 64;
     static inline constexpr const size_t cs_header_sz = mcpputil::align(sizeof(slab_allocator_object_t), cs_alignment);
     static constexpr size_t alignment() noexcept;
@@ -49,11 +58,15 @@ namespace mcppalloc::slab_allocator::details
     /**
      * \brief Return start address of memory slab.
      **/
-    uint8_t *begin() const;
+    uint8_t *begin() const noexcept;
     /**
      * \brief Return end address of memory slab.
      **/
-    uint8_t *end() const;
+    uint8_t *end() const noexcept;
+    /**
+     * \brief Return memory range of memory slab.
+     **/
+    auto memory_range() const noexcept -> memory_range_type;
     /**
      * \brief Object state begin iterator.
      **/
@@ -154,9 +167,36 @@ namespace mcppalloc::slab_allocator::details
     **/
     ::std::array<typename free_map_type::value_type, 1500> m_free_map_back;
   };
-  constexpr size_t slab_allocator_t::alignment() noexcept
+  constexpr inline size_t slab_allocator_t::alignment() noexcept
   {
     return cs_alignment;
   }
+  inline uint8_t *slab_allocator_t::begin() const noexcept
+  {
+    return m_slab.begin();
+  }
+  inline uint8_t *slab_allocator_t::end() const noexcept
+  {
+    return m_slab.end();
+  }
+  inline auto slab_allocator_t::memory_range() const noexcept -> memory_range_type
+  {
+    return memory_range_type{begin(), end()};
+  }
+  inline mcpputil::next_iterator<slab_allocator_object_t> slab_allocator_t::_u_object_begin()
+  {
+    return mcpputil::make_next_iterator(reinterpret_cast<slab_allocator_object_t *>(begin()));
+  }
+  inline mcpputil::next_iterator<slab_allocator_object_t> slab_allocator_t::_u_object_end()
+  {
+    return mcpputil::make_next_iterator(reinterpret_cast<slab_allocator_object_t *>(end()));
+  }
+  inline mcpputil::next_iterator<slab_allocator_object_t> slab_allocator_t::_u_object_current_end()
+  {
+    return mcpputil::make_next_iterator(reinterpret_cast<slab_allocator_object_t *>(m_end));
+  }
+  inline bool slab_allocator_t::_u_empty()
+  {
+    return _u_object_current_end() == _u_object_begin();
+  }
 }
-#include "slab_allocator_inlines.hpp"

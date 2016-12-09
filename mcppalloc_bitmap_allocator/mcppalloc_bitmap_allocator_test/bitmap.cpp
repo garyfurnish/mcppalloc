@@ -20,7 +20,7 @@ static void bitmap_state_test0()
   using allocator_type =
       ::mcppalloc::bitmap_allocator::bitmap_allocator_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>;
   allocator_type bitmap_allocator(2000000, 2000000);
-  auto &fast_slab = bitmap_allocator._slab();
+  auto &fast_slab = bitmap_allocator.underlying_memory();
   fast_slab.align_next(c_bitmap_block_size);
   constexpr const size_t packed_size = c_bitmap_block_size - 2048;
   uint8_t *ret = reinterpret_cast<uint8_t *>(fast_slab.allocate_raw(packed_size));
@@ -143,7 +143,7 @@ static void multiple_slab_test0()
   using allocator_type =
       ::mcppalloc::bitmap_allocator::bitmap_allocator_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>;
   allocator_type bitmap_allocator(2000000, 2000000);
-  auto &fast_slab = bitmap_allocator._slab();
+  auto &fast_slab = bitmap_allocator.underlying_memory();
   constexpr const size_t packed_size = 4096 * 16;
   uint8_t *ret = reinterpret_cast<uint8_t *>(fast_slab.allocate_raw(packed_size));
   AssertThat(reinterpret_cast<uintptr_t>(ret) % 4096, Equals(allocator_type::slab_allocator_type::cs_header_sz));
@@ -171,7 +171,7 @@ static void multiple_slab_test0b()
   using allocator_type =
       ::mcppalloc::bitmap_allocator::bitmap_allocator_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>;
   allocator_type bitmap_allocator(2000000, 2000000);
-  auto &fast_slab = bitmap_allocator._slab();
+  auto &fast_slab = bitmap_allocator.underlying_memory();
   constexpr const size_t packed_size = 4096 * 32;
   uint8_t *ret = reinterpret_cast<uint8_t *>(fast_slab.allocate_raw(packed_size));
   AssertThat(!!ret, IsTrue());

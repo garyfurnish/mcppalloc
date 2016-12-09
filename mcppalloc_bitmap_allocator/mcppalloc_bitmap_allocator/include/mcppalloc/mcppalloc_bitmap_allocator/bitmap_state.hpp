@@ -8,7 +8,6 @@ namespace mcppalloc::bitmap_allocator::details
   template <typename Allocator_Policy>
   class bitmap_package_t;
 
-  using type_id_t = uint32_t;
   static constexpr const size_t c_bitmap_alignment = 32;
   struct alignas(size_t) bitmap_state_info_t {
     uint32_t m_num_blocks;      // 8

@@ -1,4 +1,6 @@
 #pragma once
+#include "declarations.hpp"
+#include <limits>
 namespace mcppalloc::bitmap_allocator::details
 {
   /**

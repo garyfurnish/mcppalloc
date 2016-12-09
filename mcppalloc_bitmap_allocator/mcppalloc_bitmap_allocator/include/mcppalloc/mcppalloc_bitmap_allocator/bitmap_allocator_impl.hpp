@@ -5,17 +5,7 @@
 namespace mcppalloc::bitmap_allocator::details
 {
   template <typename Allocator_Policy>
-  auto bitmap_allocator_t<Allocator_Policy>::begin() const noexcept -> uint8_t *
-  {
-    return m_slab.begin();
-  }
-  template <typename Allocator_Policy>
-  auto bitmap_allocator_t<Allocator_Policy>::end() const noexcept -> uint8_t *
-  {
-    return m_slab.end();
-  }
-  template <typename Allocator_Policy>
-  auto bitmap_allocator_t<Allocator_Policy>::_slab() const noexcept -> slab_allocator_type &
+  auto bitmap_allocator_t<Allocator_Policy>::underlying_memory() const noexcept -> slab_allocator_type &
   {
     return m_slab;
   }

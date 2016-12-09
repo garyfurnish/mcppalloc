@@ -47,9 +47,7 @@ namespace mcppalloc::bitmap_allocator
 
       RETURN_CAPABILITY(m_mutex) auto _mutex() const noexcept -> mutex_type &;
 
-      auto begin() const noexcept -> uint8_t *;
-      auto end() const noexcept -> uint8_t *;
-      auto _slab() const noexcept -> slab_allocator_type &;
+      auto underlying_memory() const noexcept -> slab_allocator_type &;
 
       // TODO: NOT SURE IF THIS SHOULD BE NO LOCK OR NOT... maybe we need to acquire it in gc?
       template <typename Predicate>
