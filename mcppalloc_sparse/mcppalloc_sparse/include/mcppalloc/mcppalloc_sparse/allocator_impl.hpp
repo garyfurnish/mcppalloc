@@ -480,7 +480,7 @@ namespace mcppalloc::sparse::details
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     // first check to see if it is past end of used slab.
-    if (_u_current_end() <= pair.begin() && pair.end() <= _u_end())
+    if (_u_current_end() <= pair.begin() && pair.end() <= underlying_memory().end())
       return true;
     // otherwise check to see if it is in some interval in the free list.
     for (auto &&fpair : m_free_list) {
@@ -496,31 +496,14 @@ namespace mcppalloc::sparse::details
     return m_free_list.size();
   }
   template <typename Allocator_Policy>
-  inline uint8_t *allocator_t<Allocator_Policy>::begin() const
+  auto allocator_t<Allocator_Policy>::underlying_memory() -> ::mcpputil::slab_t &
   {
-    MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
-    return m_slab.begin();
+    return m_slab;
   }
   template <typename Allocator_Policy>
-  inline auto allocator_t<Allocator_Policy>::_u_begin() const noexcept -> uint8_t *
+  auto allocator_t<Allocator_Policy>::underlying_memory() const -> const ::mcpputil::slab_t &
   {
-    return m_slab.begin();
-  }
-  template <typename Allocator_Policy>
-  inline auto allocator_t<Allocator_Policy>::_u_end() const noexcept -> uint8_t *
-  {
-    return m_slab.end();
-  }
-  template <typename Allocator_Policy>
-  inline uint8_t *allocator_t<Allocator_Policy>::_u_current_end() const
-  {
-    return m_current_end;
-  }
-  template <typename Allocator_Policy>
-  inline uint8_t *allocator_t<Allocator_Policy>::end() const
-  {
-    MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
-    return m_slab.end();
+    return m_slab;
   }
   template <typename Allocator_Policy>
   inline uint8_t *allocator_t<Allocator_Policy>::current_end() const
@@ -533,6 +516,11 @@ namespace mcppalloc::sparse::details
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     return _u_current_range();
+  }
+  template <typename Allocator_Policy>
+  inline uint8_t *allocator_t<Allocator_Policy>::_u_current_end() const
+  {
+    return m_current_end;
   }
   template <typename Allocator_Policy>
   mcpputil::system_memory_range_t allocator_t<Allocator_Policy>::_u_current_range() const
@@ -559,7 +547,7 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   inline auto allocator_t<Allocator_Policy>::_u_current_size() const noexcept -> size_t
   {
-    return static_cast<size_t>(_u_current_end() - _u_begin());
+    return static_cast<size_t>(_u_current_end() - underlying_memory().begin());
   }
 
   template <typename Allocator_Policy>

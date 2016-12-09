@@ -157,7 +157,7 @@ namespace mcppalloc::sparse::details
   bool thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::destroy(void *v)
   {
     // only support slow lab right now.
-    assert(v >= m_allocator.begin() && v <= m_allocator.end());
+    assert(m_allocator.underlying_memory().memory_range().contains(v));
     // get object state
     auto os = this_block_type::object_state_type::from_object_start(v);
     // find block set id for object.

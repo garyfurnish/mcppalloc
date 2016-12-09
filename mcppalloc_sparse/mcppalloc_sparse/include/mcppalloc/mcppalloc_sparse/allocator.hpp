@@ -252,14 +252,8 @@ namespace mcppalloc::sparse
        * @return nullptr on error.
       **/
       const this_allocator_block_handle_t *_u_find_block(void *addr) REQUIRES(m_mutex);
-      /**
-       * \brief Return the beginning of the underlying slab.
-      **/
-      uint8_t *begin() const REQUIRES(!m_mutex);
-      /**
-       * \brief Return the end of the underlying slab.
-      **/
-      uint8_t *end() const REQUIRES(!m_mutex);
+      auto underlying_memory() -> ::mcpputil::slab_t &;
+      auto underlying_memory() const -> const ::mcpputil::slab_t &;
       /**
        * \brief Return the end of the currently used portion of the slab.
       **/
@@ -314,14 +308,6 @@ namespace mcppalloc::sparse
        * \brief Return the free list for debugging purposes without locking.
       **/
       const memory_range_vector_t &_ud_free_list() const REQUIRES(m_mutex);
-      /**
-       * \brief Return the beginning of the underlying slab.
-       **/
-      uint8_t *_u_begin() const noexcept;
-      /**
-       * \brief Return the end of the underlying slab.
-      **/
-      uint8_t *_u_end() const noexcept;
       /**
        * \brief Return the end of the currently used portion of the slab.
        *

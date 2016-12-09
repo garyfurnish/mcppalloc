@@ -231,8 +231,9 @@ namespace mcppalloc::bitmap_allocator::details
   template <typename Allocator_Policy>
   auto bitmap_thread_allocator_t<Allocator_Policy>::deallocate(void *v) noexcept -> bool
   {
-    if (v < m_allocator.underlying_memory().begin() || v >= m_allocator.underlying_memory().end())
+    if (!m_allocator.underlying_memory().memory_range().contains(v)) {
       return false;
+    }
     auto state = get_state(v);
     auto type_id = state->type_id();
     auto package = m_locals.find(type_id);
