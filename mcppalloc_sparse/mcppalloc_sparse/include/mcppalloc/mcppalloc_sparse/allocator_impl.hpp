@@ -2,6 +2,8 @@
 #if defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL != 0
 #error "IDL must be zero"
 #endif
+#include "functor.hpp"
+#include "sparse_allocator_verifier.hpp"
 #include <iostream>
 #include <mcpputil/mcpputil/container_functions.hpp>
 namespace mcppalloc::sparse::details
@@ -26,7 +28,8 @@ namespace mcppalloc::sparse::details
       MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     }
     MCPPALLOC_CONCURRENCY_LOCK_ASSUME(m_mutex);
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     // first shutdown all thread allocators.
     m_thread_allocators.clear();
     // then get rid of all block handles.
@@ -34,12 +37,10 @@ namespace mcppalloc::sparse::details
     // then get rid of any lingering blocks.
     m_global_blocks.clear();
     m_free_list.clear();
-    {
-      auto a1 = ::std::move(m_thread_allocators);
-      auto a2 = ::std::move(m_blocks);
-      auto a3 = ::std::move(m_global_blocks);
-      auto a4 = ::std::move(m_free_list);
-    }
+    mcpputil::clear_capacity(m_thread_allocators);
+    mcpputil::clear_capacity(m_blocks);
+    mcpputil::clear_capacity(m_global_blocks);
+    mcpputil::clear_capacity(m_free_list);
     // tell the world the destructor has been called.
     m_shutdown = true;
   }
@@ -62,7 +63,8 @@ namespace mcppalloc::sparse::details
       return false;
     // setup current end point (nothing used yet).
     m_current_end = m_slab.begin();
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     return true;
   }
   template <typename Allocator_Policy>
@@ -75,7 +77,8 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   auto allocator_t<Allocator_Policy>::_u_get_memory(size_t sz, bool try_expand) -> mcpputil::system_memory_range_t
   {
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     sz = mcpputil::align(sz, mcpputil::c_alignment);
     // do worst fit memory vector lookup
     typename memory_range_vector_t::iterator worst = m_free_list.end();
@@ -106,7 +109,7 @@ namespace mcppalloc::sparse::details
     auto sz_available = m_slab.end() - m_current_end;
     // heap out of memory.
     if (sz_available < 0) // shouldn't happen
-      ::std::terminate();
+      ::std::abort();
     if (static_cast<size_t>(sz_available) >= sz) {
       // recalculate used end.
       uint8_t *new_end = m_current_end + sz;
@@ -136,7 +139,8 @@ namespace mcppalloc::sparse::details
     // create the memory interval pair.
     auto ret = ::std::make_pair(m_current_end, new_end);
     m_current_end = new_end;
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     assert(reinterpret_cast<uintptr_t>(ret.first) % mcpputil::c_alignment == 0);
     assert(reinterpret_cast<uintptr_t>(ret.second) % mcpputil::c_alignment == 0);
     return ret;
@@ -182,7 +186,7 @@ namespace mcppalloc::sparse::details
                                                                 bool try_expand)
   {
     (void)try_expand;
-    // try to allocate memory.
+    // try to allocate memory.o
     auto memory = _u_get_memory(sz, true);
     if (!memory.begin()) {
       return false;
@@ -217,36 +221,14 @@ namespace mcppalloc::sparse::details
     _u_release_memory(std::make_pair(block.begin(), block.end()));
   }
 
-  /**
-   * \brief Functor to compare block handles by beginning locations.
-   **/
-  struct block_handle_begin_compare_t {
-    template <typename T1>
-    bool operator()(const T1 &h1, const T1 &h2)
-    {
-      return h1.m_begin < h2.m_begin;
-    }
-  };
   template <typename Allocator_Policy>
   void allocator_t<Allocator_Policy>::_u_register_allocator_block(this_thread_allocator_t &ta, allocator_block_type &block)
   {
     if_constexpr(c_debug_level)
     {
-      _ud_verify();
-      for (auto &&it : m_blocks) {
-        // it is a fatal error to try to double add and something is inconsistent.  Terminate before memory corruption
-        // spreads.
-        if (it.m_block == &block)
-          ::std::terminate();
-        // it is a fatal error to try to double add and something is inconsistent.  Terminate before memory corruption
-        // spreads.
-        if (it.m_begin == block.begin()) {
-          ::std::cerr << " Attempt to double register block. 77dbea01-7e0f-49da-81f1-9ad7f4616eea\n";
-          ::std::cerr << "77dbea01-7e0f-49da-81f1-9ad7f4616eea " << &block << " " << reinterpret_cast<void *>(block.begin())
-                      << ::std::endl;
-          ::std::terminate();
-        }
-      }
+      sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+      ;
+      sparse_allocator_verifier_t::verify_block_new(*this, block);
     }
     // create a fake handle to search for.
     this_allocator_block_handle_t handle;
@@ -256,7 +238,8 @@ namespace mcppalloc::sparse::details
     // emplace a block handle.
     auto it = m_blocks.emplace(ub);
     it->initialize(&ta, &block, block.begin());
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
   }
   template <typename Allocator_Policy>
   void allocator_t<Allocator_Policy>::unregister_allocator_block(allocator_block_type &block)
@@ -269,7 +252,8 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   void allocator_t<Allocator_Policy>::_u_unregister_allocator_block(allocator_block_type &block)
   {
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     // create a fake handle to search for.
     this_allocator_block_handle_t handle;
     handle.initialize(nullptr, &block, block.begin());
@@ -281,25 +265,18 @@ namespace mcppalloc::sparse::details
     } else {
       // This should never happen, so memory corruption issue if it has, so kill the program.
       ::std::cerr << "Unable to find allocator block to unregister e5471709-3eae-43bf-bdd9-86ba9064f103\n" << ::std::endl;
-      ::std::terminate();
+      ::std::abort();
     }
-    _ud_verify();
-  }
-  template <typename Allocator_Policy>
-  void allocator_t<Allocator_Policy>::_ud_verify()
-  {
-    if_constexpr(c_debug_level > 1)
-    {
-      // this is really expensive, but verify that blocks are sorted.
-      assert(m_blocks.empty() || ::std::is_sorted(m_blocks.begin(), m_blocks.end(), block_handle_begin_compare_t{}));
-    }
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
   }
   template <typename Allocator_Policy>
   void allocator_t<Allocator_Policy>::_d_verify()
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     // forward verify request.
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
   }
   template <typename Allocator_Policy>
   template <typename Iterator>
@@ -346,7 +323,8 @@ namespace mcppalloc::sparse::details
       // move last set of contiguous blocks.
       _u_move_registered_blocks_contiguous(contiguous, begin + static_cast<ptrdiff_t>(contig_start), lb);
     }
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
   }
 
   template <typename Allocator_Policy>
@@ -374,9 +352,10 @@ namespace mcppalloc::sparse::details
       }
     } else {
       ::std::cerr << "During move, UB <=lb";
-      ::std::terminate();
+      ::std::abort();
     }
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
   }
 
   template <typename Allocator_Policy>
@@ -402,20 +381,21 @@ namespace mcppalloc::sparse::details
         ::std::cerr << "MCPPALLOC: Unable to find block to move. 1b455b54-e6b2-4f5e-9f1c-957012dfddc5\n";
         ::std::cerr << old_block << " " << new_block << ::std::endl;
         // This should never happen, so memory corruption issue if it has, so kill the program.
-        ::std::terminate();
+        ::std::abort();
       }
     } else {
       // couldn't find old block
       ::std::cerr << "MCPPALLOC: Unable to find block to move, lb is end. e2c0011f-52fa-4f86-886e-b9b932cc0cb3\n";
       // This should never happen, so memory corruption issue if it has, so kill the program.
-      ::std::terminate();
+      ::std::abort();
     }
   }
   template <typename Allocator_Policy>
   auto allocator_t<Allocator_Policy>::_u_find_block(void *in_addr) -> const this_allocator_block_handle_t *
   {
     uint8_t *addr = reinterpret_cast<uint8_t *>(in_addr);
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     // create fake block handle to search for.
     this_allocator_block_handle_t handle;
     handle.initialize(nullptr, nullptr, addr);
@@ -431,7 +411,8 @@ namespace mcppalloc::sparse::details
     // this could happen if the block the address belonged to was destroyed.
     if (ub->m_block->end() <= addr)
       return nullptr;
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     // get address stored in iterator.
     return &*ub;
   }
@@ -450,7 +431,8 @@ namespace mcppalloc::sparse::details
     m_global_blocks.emplace_back(std::move(block));
     // move the registration for the block.
     _u_move_registered_block(old_block_addr, &m_global_blocks.back());
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
   }
   template <typename Allocator_Policy>
   void allocator_t<Allocator_Policy>::release_memory(const mcpputil::system_memory_range_t &pair)
@@ -462,7 +444,8 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   void allocator_t<Allocator_Policy>::_u_release_memory(const mcpputil::system_memory_range_t &pair)
   {
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     // if the interval is at the end of the currently used part of slab, just move slab pointer.
     if (pair.end() == m_current_end) {
       m_current_end = pair.begin();
@@ -473,7 +456,8 @@ namespace mcppalloc::sparse::details
           ::std::upper_bound(m_free_list.begin(), m_free_list.end(), pair, mcpputil::system_memory_range_t::size_comparator());
       m_free_list.insert(ub, pair);
     }
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
   }
   template <typename Allocator_Policy>
   auto allocator_t<Allocator_Policy>::in_free_list(const mcpputil::system_memory_range_t &pair) const noexcept -> bool
@@ -554,7 +538,8 @@ namespace mcppalloc::sparse::details
   inline void allocator_t<Allocator_Policy>::collapse()
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     ::std::sort(m_free_list.begin(), m_free_list.end());
     for (auto it = m_free_list.rbegin(), end = m_free_list.rend(); it != end; ++it) {
       auto prev = it + 1;
@@ -572,7 +557,8 @@ namespace mcppalloc::sparse::details
       }
     }
     ::std::sort(m_free_list.begin(), m_free_list.end(), mcpputil::system_memory_range_t::size_comparator());
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
   }
   template <typename Allocator_Policy>
   inline auto allocator_t<Allocator_Policy>::_d_free_list() const -> memory_range_vector_t
@@ -589,7 +575,8 @@ namespace mcppalloc::sparse::details
   inline auto allocator_t<Allocator_Policy>::initialize_thread() -> this_thread_allocator_t &
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
-    _ud_verify();
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    ;
     // first check to see if there is already a thread allocator for this thread.
     auto it = m_thread_allocators.find(::std::this_thread::get_id());
     if (it != m_thread_allocators.end())
@@ -610,7 +597,8 @@ namespace mcppalloc::sparse::details
     thread_allocator_unique_ptr_t ptr;
     {
       MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
-      _ud_verify();
+      sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+      ;
       // find ta entry.
       auto it = m_thread_allocators.find(::std::this_thread::get_id());
       // check to make sure it was initialized at some point.
@@ -621,7 +609,8 @@ namespace mcppalloc::sparse::details
       ptr = std::move(it->second);
       // erase the entry in the ta list.
       m_thread_allocators.erase(it);
-      _ud_verify();
+      sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+      ;
     }
   }
   template <typename Allocator_Policy>

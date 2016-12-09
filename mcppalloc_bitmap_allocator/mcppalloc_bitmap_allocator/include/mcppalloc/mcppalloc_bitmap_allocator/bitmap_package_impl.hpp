@@ -2,6 +2,7 @@
 #include <mcpputil/mcpputil/boost/iterator/zip_iterator.hpp>
 #include <mcpputil/mcpputil/boost/property_tree/ptree.hpp>
 #include <mcpputil/mcpputil/boost/range/iterator_range.hpp>
+#include <mcpputil/mcpputil/container_functions.hpp>
 #include <mcpputil/mcpputil/literals.hpp>
 namespace mcppalloc::bitmap_allocator::details
 {
@@ -146,9 +147,7 @@ namespace mcppalloc::bitmap_allocator::details
   {
     for (auto &&entry : m_vectors) {
       auto &&vec = entry.m_vector;
-      vec.clear();
-      auto a1 = ::std::move(vec);
-      (void)a1;
+      mcpputil::clear_capacity(vec);
     }
   }
   template <typename Allocator_Policy>

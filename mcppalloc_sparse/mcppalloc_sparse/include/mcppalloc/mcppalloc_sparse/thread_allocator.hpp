@@ -8,15 +8,6 @@
 #include <mcpputil/mcpputil/memory_range.hpp>
 namespace mcppalloc::sparse::details
 {
-  /**
-   * \brief Output the memory pair as a stirng to the stream.
-  **/
-  template <typename T>
-  void print_memory_pair(T &os, const ::std::pair<uint8_t *, uint8_t *> &pair);
-  /**
-   * \brief Output the memory pair to the string.
-  **/
-  inline ::std::string to_string(const ::std::pair<uint8_t *, uint8_t *> &pair);
   template <typename Allocator_Policy>
   class allocator_t;
   /**

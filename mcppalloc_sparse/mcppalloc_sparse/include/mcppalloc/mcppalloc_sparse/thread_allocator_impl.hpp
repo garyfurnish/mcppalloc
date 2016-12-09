@@ -4,17 +4,6 @@
 
 namespace mcppalloc::sparse::details
 {
-  template <typename T>
-  void print_memory_pair(T &os, const ::std::pair<uint8_t *, uint8_t *> &pair)
-  {
-    os << "(" << static_cast<void *>(pair.first) << " " << static_cast<void *>(pair.second) << ")";
-  }
-  inline ::std::string to_string(const ::std::pair<uint8_t *, uint8_t *> &pair)
-  {
-    ::std::stringstream ss;
-    print_memory_pair(ss, pair);
-    return ss.str();
-  }
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
   thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::thread_allocator_t(global_allocator &allocator)
       : m_allocator(allocator)
@@ -282,7 +271,7 @@ namespace mcppalloc::sparse::details
     // see if safe to add a block
     if (!abs.add_block_is_safe()) {
       // if not safe to move a block, expand that allocator block set.
-      m_allocator._ud_verify();
+      sparse_allocator_verifier_t::verify_blocks_sorted(m_allocator);
       abs._verify();
       ptrdiff_t offset = static_cast<ptrdiff_t>(abs.grow_blocks());
       abs._verify();

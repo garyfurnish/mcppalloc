@@ -319,10 +319,6 @@ namespace mcppalloc::sparse
        **/
       mcpputil::system_memory_range_t _u_current_range() const REQUIRES(m_mutex);
       /**
-       * \brief Internal consistency checks without locking.
-      **/
-      void _ud_verify() REQUIRES(m_mutex);
-      /**
        * \brief Perform internal consistency checks.
       **/
       void _d_verify() REQUIRES(!m_mutex);
@@ -512,6 +508,8 @@ namespace mcppalloc::sparse
        * \brief Maximum heap size.
        **/
       size_type m_maximum_heap_size = 0;
+
+      friend class sparse_allocator_verifier_t;
 
     public:
       /**
