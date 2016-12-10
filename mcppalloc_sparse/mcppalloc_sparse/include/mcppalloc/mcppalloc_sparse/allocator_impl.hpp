@@ -224,12 +224,8 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   void allocator_t<Allocator_Policy>::_u_register_allocator_block(this_thread_allocator_t &ta, allocator_block_type &block)
   {
-    if_constexpr(c_debug_level)
-    {
-      sparse_allocator_verifier_t::verify_blocks_sorted(*this);
-      ;
-      sparse_allocator_verifier_t::verify_block_new(*this, block);
-    }
+    sparse_allocator_verifier_t::verify_blocks_sorted(*this);
+    sparse_allocator_verifier_t::verify_block_new(*this, block);
     // create a fake handle to search for.
     this_allocator_block_handle_t handle;
     handle.initialize(&ta, &block, block.begin());

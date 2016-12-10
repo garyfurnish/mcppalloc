@@ -233,6 +233,8 @@ namespace mcppalloc::sparse::details
     **/
     allocator_block_vector_t m_blocks;
 
+    friend class sparse_allocator_block_set_verifier_t;
+
   private:
     /**
      * \brief Minimum allocation size.

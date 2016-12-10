@@ -23,9 +23,9 @@ namespace mcppalloc::sparse::details
   {
     // sanity check alignment of start.
     if (mcpputil_unlikely(reinterpret_cast<size_t>(m_start) % minimum_header_alignment() != 0))
-      ::std::terminate();
+      ::std::abort();
     if (mcpputil_unlikely(reinterpret_cast<size_t>(m_end) % minimum_header_alignment() != 0))
-      ::std::terminate();
+      ::std::abort();
     if (maximum_alloc_length == c_infinite_length) {
       m_maximum_alloc_length = maximum_alloc_length;
     } else {
