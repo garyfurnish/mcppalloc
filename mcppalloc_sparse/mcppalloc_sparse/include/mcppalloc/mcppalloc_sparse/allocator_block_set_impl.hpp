@@ -4,6 +4,8 @@
 #include <cassert>
 #include <iostream>
 #include <mcpputil/mcpputil/boost/property_tree/ptree.hpp>
+#include <mcpputil/mcpputil/pointer_utils.hpp>
+#include <mcpputil/mcpputil/vector_utils.hpp>
 namespace mcppalloc::sparse::details
 {
 
@@ -58,7 +60,7 @@ namespace mcppalloc::sparse::details
       }
     }
     m_available_blocks.insert(blocks.begin(), blocks.end());
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
   }
   template <typename Allocator_Policy>
   void allocator_block_set_t<Allocator_Policy>::collect()
@@ -69,17 +71,13 @@ namespace mcppalloc::sparse::details
     }
     // some blocks may have become available so regenerate available blocks.
     regenerate_available_blocks();
-    _verify();
-  }
-  template <typename Allocator_Policy>
-  void allocator_block_set_t<Allocator_Policy>::_verify() const
-  {
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
   }
   template <typename Allocator_Policy>
   auto allocator_block_set_t<Allocator_Policy>::allocate(size_t sz) -> allocation_return_type
   {
     allocation_return_type ret(block_type{nullptr, 0}, nullptr);
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     if (m_available_blocks.empty()) {
       if (!m_blocks.empty()) {
         if (!last_block()) {
@@ -87,12 +85,12 @@ namespace mcppalloc::sparse::details
           return ret;
         }
         ret = last_block()->allocate(sz);
-        _verify();
+        sparse_allocator_block_set_verifier_t::verify_all(*this);
         return ret;
       }
     }
     const auto lower_bound = ::std::lower_bound(m_available_blocks.begin(), m_available_blocks.end(),
-                                                sized_block_ref_t(sz, nullptr), abrvr_size_compare);
+                                                sized_block_ref_t(sz, nullptr), first_is_less_t{});
     // no place to put it in available blocks, put it in last block.
     if (lower_bound == m_available_blocks.end()) {
       if (!m_blocks.empty()) {
@@ -101,10 +99,10 @@ namespace mcppalloc::sparse::details
           return ret;
         }
         ret = last_block()->allocate(sz);
-        _verify();
+        sparse_allocator_block_set_verifier_t::verify_all(*this);
         return ret;
       }
-      _verify();
+      sparse_allocator_block_set_verifier_t::verify_all(*this);
       return ret;
     }
     // if here, there is a block in available blocks to use.
@@ -131,7 +129,7 @@ namespace mcppalloc::sparse::details
     // see if there is allocation left in block.
     if (new_max_alloc == 0) {
       m_available_blocks.erase(lower_bound);
-      _verify();
+      sparse_allocator_block_set_verifier_t::verify_all(*this);
       return ret;
     }
     // find new insertion point.
@@ -144,19 +142,19 @@ namespace mcppalloc::sparse::details
     if (new_ub == lower_bound + 1) {
       lower_bound->first = new_pair.first;
       // no change, return
-      _verify();
+      sparse_allocator_block_set_verifier_t::verify_all(*this);
       return ret;
     }
     lower_bound->first = new_max_alloc;
     ::std::rotate(new_ub, lower_bound, lower_bound + 1);
     new_ub->first = new_pair.first;
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     return ret;
   }
   template <typename Allocator_Policy>
   bool allocator_block_set_t<Allocator_Policy>::destroy(void *v)
   {
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     auto it = ::std::lower_bound(m_blocks.begin(), m_blocks.end(), v, end_val_compare);
     size_t last_collapsed_size = 0;
     size_t prev_last_max_alloc_available = 0;
@@ -182,28 +180,28 @@ namespace mcppalloc::sparse::details
 
             ::std::rotate(ab_it2, ab_it2 + 1, ub);
             (ub - 1)->first = pair.first;
-            _verify();
+            sparse_allocator_block_set_verifier_t::verify_all(*this);
           } else {
             // ub < ab_it2
             ::std::rotate(ub, ab_it2, ab_it2 + 1);
             (ub)->first = pair.first;
-            _verify();
+            sparse_allocator_block_set_verifier_t::verify_all(*this);
           }
-          _verify();
+          sparse_allocator_block_set_verifier_t::verify_all(*this);
         } else {
         NOT_FOUND:
-          _verify();
+          sparse_allocator_block_set_verifier_t::verify_all(*this);
           const sized_block_ref_t pair = ::std::make_pair(it->max_alloc_available(), &*it);
           m_available_blocks.insert(pair);
-          _verify();
+          sparse_allocator_block_set_verifier_t::verify_all(*this);
         }
       }
       // increment destroyed count.
       m_num_destroyed_since_free += 1;
-      _verify();
+      sparse_allocator_block_set_verifier_t::verify_all(*this);
       return true;
     }
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     return false;
   }
   template <typename Allocator_Policy>
@@ -214,7 +212,7 @@ namespace mcppalloc::sparse::details
                                                           Move_Functional &&move_func) -> allocator_block_type &
   {
 
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     if (!m_blocks.empty()) {
       assert(m_last_block < &*m_blocks.end());
       typename allocator_block_vector_t::value_type *bbegin = &m_blocks.front();
@@ -247,12 +245,12 @@ namespace mcppalloc::sparse::details
         }
       }
       m_last_block = &*moved_begin;
-      _verify();
+      sparse_allocator_block_set_verifier_t::verify_all(*this);
     } else {
       m_blocks.emplace_back(::std::move(block));
       m_last_block = &m_blocks.back();
     }
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     assert(!m_blocks.empty());
     return *m_last_block;
   }
@@ -268,7 +266,7 @@ namespace mcppalloc::sparse::details
                                                              Unlock_Functional &&unlock_func,
                                                              Move_Functional &&move_func)
   {
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     // adjust available blocks.
     const auto ait =
         ::std::find_if(m_available_blocks.begin(), m_available_blocks.end(), [&it](auto &&abp) { return abp.second == &*it; });
@@ -297,7 +295,7 @@ namespace mcppalloc::sparse::details
     } else if (last_block() > &*it) {
       m_last_block--;
     }
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
   }
   template <typename Allocator_Policy>
   bool allocator_block_set_t<Allocator_Policy>::add_block_is_safe() const
@@ -308,21 +306,20 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   size_t allocator_block_set_t<Allocator_Policy>::grow_blocks(size_t sz)
   {
-    _verify();
-    // save old location of blocks.
-    typename allocator_block_vector_t::value_type *bbegin = &m_blocks.front();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
+    size_t reserve_sz;
     if (sz == 0 || sz < m_blocks.size())
-      m_blocks.reserve(m_blocks.size() * 2);
+      reserve_sz = m_blocks.size() * 2;
     else
-      m_blocks.reserve(sz);
-    // get offset from old location
-    auto offset = reinterpret_cast<uint8_t *>(&m_blocks.front()) - reinterpret_cast<uint8_t *>(bbegin);
+      reserve_sz = sz;
+
+    auto offset = mcpputil::grow_by_reserve(m_blocks, reserve_sz);
     // adjust location of available blocks by adding offset to each.
     for (auto &pair : m_available_blocks) {
-      pair.second = reinterpret_cast<allocator_block_type *>(reinterpret_cast<uint8_t *>(pair.second) + offset);
+      mcpputil::adjust_pointer_by_offset(pair.second, offset);
     }
-    m_last_block = reinterpret_cast<allocator_block_type *>(reinterpret_cast<uint8_t *>(m_last_block) + offset);
-    _verify();
+    mcpputil::adjust_pointer_by_offset(m_last_block, offset);
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     return static_cast<size_t>(offset);
   }
   template <typename Allocator_Policy>
@@ -384,7 +381,7 @@ namespace mcppalloc::sparse::details
   void allocator_block_set_t<Allocator_Policy>::free_empty_blocks(
       L &&l, Lock_Functional &&lock_func, Unlock_Functional &&unlock_func, Move_Functional &&move_func, size_t min_to_leave)
   {
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     // this looks really complicated but it is actually quite light weight since blocks are tiny and everything is contiguous.
     size_t num_empty = 0;
     // first we collect and see how many total empty blocks there are.
@@ -399,8 +396,8 @@ namespace mcppalloc::sparse::details
     for (auto &&ab : m_available_blocks) {
       ab.first = ab.second->last_max_alloc_available();
     }
-    ::std::sort(m_available_blocks.begin(), m_available_blocks.end(), abrvr_compare);
-    _verify();
+    ::std::sort(m_available_blocks.begin(), m_available_blocks.end(), lexographic_less_t{});
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
     for (auto it = m_blocks.rbegin(); it != m_blocks.rend(); ++it) {
       auto &block = *it;
       // now go through empty blocks
@@ -421,7 +418,7 @@ namespace mcppalloc::sparse::details
     }
     // reset destroyed counter.
     m_num_destroyed_since_free = 0;
-    _verify();
+    sparse_allocator_block_set_verifier_t::verify_all(*this);
   }
   template <typename Allocator_Policy>
   auto allocator_block_set_t<Allocator_Policy>::num_destroyed_since_last_free() const noexcept -> size_t

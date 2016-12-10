@@ -1,4 +1,5 @@
 #pragma once
+#include "functor.hpp"
 #include <mcpputil/mcpputil/boost/property_tree/json_parser.hpp>
 #include <mcpputil/mcpputil/boost/property_tree/ptree.hpp>
 
@@ -16,8 +17,9 @@ namespace mcppalloc::sparse::details
     // set minimum local blocks to 0 so all free blooks go to global.
     set_minimum_local_blocks(0);
     // debug mode verify.
-    for (auto &abs : m_allocators)
-      abs._verify();
+    for (auto &abs : m_allocators) {
+      sparse_allocator_block_set_verifier_t::verify_all(abs);
+    }
     m_allocator._d_verify();
     // free empty blocks.
     free_empty_blocks(0, true);
@@ -272,9 +274,9 @@ namespace mcppalloc::sparse::details
     if (!abs.add_block_is_safe()) {
       // if not safe to move a block, expand that allocator block set.
       sparse_allocator_verifier_t::verify_blocks_sorted(m_allocator);
-      abs._verify();
+      sparse_allocator_block_set_verifier_t::verify_all(abs);
       ptrdiff_t offset = static_cast<ptrdiff_t>(abs.grow_blocks());
-      abs._verify();
+      sparse_allocator_block_set_verifier_t::verify_all(abs);
       m_allocator._u_move_registered_blocks(abs.m_blocks, offset);
     }
     typename global_allocator::allocator_block_type block;

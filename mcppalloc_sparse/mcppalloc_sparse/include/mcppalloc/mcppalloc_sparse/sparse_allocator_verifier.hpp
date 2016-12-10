@@ -15,6 +15,7 @@ namespace mcppalloc::sparse::details
     template <typename Allocator>
     static void verify_blocks_sorted(Allocator &allocator);
   };
+  // Definitions
   template <typename Allocator, typename Block>
   void sparse_allocator_verifier_t::verify_block_new(Allocator &allocator, Block &block)
   {

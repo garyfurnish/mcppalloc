@@ -1,6 +1,10 @@
 include_directories(include)
 include_directories(../../mcppalloc/mcppalloc/include)
 list (APPEND SRC_FILES
+  src/allocator.cpp
+  src/thread_allocator.cpp
+  src/allocator_block_set.cpp
+  src/allocator_block.cpp
   src/sparse_allocator_verifier.cpp
   src/sparse_allocator_block_set_verifier.cpp
 )
