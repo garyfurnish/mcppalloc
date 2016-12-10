@@ -1,12 +1,12 @@
 #pragma once
 #include "allocator_block.hpp"
+#include "functor.hpp"
 #include <boost/container/flat_set.hpp>
 #include <boost/property_tree/ptree_fwd.hpp>
 #include <mcppalloc/object_state.hpp>
 #include <utility>
 namespace mcppalloc::sparse::details
 {
-  using memory_range_t = ::std::pair<void *, void *>;
   /**
    * \brief This is a set of allocator blocks with the same minimum and maximum allocation size.
    *
@@ -26,28 +26,9 @@ namespace mcppalloc::sparse::details
     using sized_block_ref_t = typename ::std::pair<size_t, allocator_block_type *>;
     using allocator_block_reference_vector_t = mcpputil::rebind_vector_t<sized_block_ref_t, allocator>;
 
-    const struct abrvr_compare_type {
-      auto operator()(const sized_block_ref_t &r, const sized_block_ref_t &it) const -> bool
-      {
-        if (r.first < it.first)
-          return true;
-        else if (r.first == it.first)
-          return r.second < it.second;
-        else
-          return false;
-      }
-
-    } abrvr_compare{};
-    const struct abrvr_size_compare_type {
-      constexpr auto operator()(const sized_block_ref_t &r, const sized_block_ref_t &it) const -> bool
-      {
-        return r.first < it.first;
-      }
-
-    } abrvr_size_compare{};
     using allocator_traits = typename ::std::allocator_traits<allocator>;
     using allocator_block_flat_set_t = ::boost::container::
-        flat_set<sized_block_ref_t, abrvr_compare_type, typename allocator_traits::template rebind_alloc<sized_block_ref_t>>;
+        flat_set<sized_block_ref_t, lexographic_less_t, typename allocator_traits::template rebind_alloc<sized_block_ref_t>>;
     using block_type = block_t<allocator_policy_type>;
     explicit allocator_block_set_t() = default;
     allocator_block_set_t(const allocator_block_set_t &) = delete;
@@ -175,10 +156,6 @@ namespace mcppalloc::sparse::details
      * \brief Return the number of memory addresses destroyed since last free empty blocks operation.
      **/
     auto num_destroyed_since_last_free() const noexcept -> size_t;
-    /**
-     * \brief Do internal verification.
-    **/
-    void _verify() const;
     /**
      * \brief Do maintance on thread associated blocks.
      *

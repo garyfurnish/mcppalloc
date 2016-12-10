@@ -1,6 +1,7 @@
 #pragma once
 #include "debug.hpp"
 #include "declarations.hpp"
+#include "functor.hpp"
 #include <algorithm>
 #include <iostream>
 namespace mcppalloc::sparse::details
@@ -83,9 +84,10 @@ namespace mcppalloc::sparse::details
         return;
       }
     }
-    template <typename Allocator_Block_Set, typename Compare>
-    static void verify_available_blocks_sorted(Allocator_Block_Set &abs, Compare &compare)
+    template <typename Allocator_Block_Set>
+    static void verify_available_blocks_sorted(Allocator_Block_Set &abs)
     {
+      const auto compare = lexographic_less_t();
       if_constexpr(!debug_verify_allocator_block_set_available_blocks_sorted)
       {
         return;
@@ -121,14 +123,14 @@ namespace mcppalloc::sparse::details
         ::std::abort();
       }
     }
-    template <typename Allocator_Block_Set, typename Compare>
-    static void verify_all(Allocator_Block_Set &abs, Compare &compare)
+    template <typename Allocator_Block_Set>
+    static void verify_all(Allocator_Block_Set &abs)
     {
       if_constexpr(debug_level)
       {
         sparse_allocator_block_set_verifier_t::verify_magic_numbers(abs);
         sparse_allocator_block_set_verifier_t::verify_available_blocks(abs);
-        sparse_allocator_block_set_verifier_t::verify_available_blocks_sorted(abs, compare);
+        sparse_allocator_block_set_verifier_t::verify_available_blocks_sorted(abs);
         sparse_allocator_block_set_verifier_t::verify_no_adjacent_duplicates(abs);
       }
     }
