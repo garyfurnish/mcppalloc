@@ -1,10 +1,8 @@
 #pragma once
-#include "allocator_block.hpp"
+#include "sparse_allocator_block_base.hpp"
 #include <algorithm>
 #include <mcppalloc/block.hpp>
 #include <mcppalloc/default_allocator_policy.hpp>
-#include <mcppalloc/object_state.hpp>
-#include <mcpputil/mcpputil/boost/container/flat_set.hpp>
 #include <mcpputil/mcpputil/boost/property_tree/ptree_fwd.hpp>
 #include <mcpputil/mcpputil/container.hpp>
 #include <mcpputil/mcpputil/make_unique.hpp>
@@ -34,6 +32,10 @@ namespace mcppalloc
   }
   namespace sparse::details
   {
+    struct default_sparse_allocator_block_policy_t {
+      using byte_pointer_type = uint8_t *;
+      using size_type = size_t;
+    };
     /**
      * \brief Allocator block.
      *
@@ -45,7 +47,7 @@ namespace mcppalloc
      * The last valid object_state_t always points to an object_state_t at end().
      **/
     template <typename Allocator_Policy>
-    class allocator_block_t
+    class allocator_block_t : public sparse_allocator_block_base_t<default_sparse_allocator_block_policy_t>
     {
     public:
       using size_type = size_t;
@@ -58,10 +60,6 @@ namespace mcppalloc
       static user_data_type s_default_user_data;
       using block_type = block_t<allocator_policy_type>;
       using allocation_return_type = ::std::tuple<block_type, object_state_type *>;
-      static constexpr size_type minimum_header_alignment() noexcept
-      {
-        return allocator_policy_type::cs_minimum_alignment;
-      }
 
       allocator_block_t() = default;
       /**
@@ -78,46 +76,6 @@ namespace mcppalloc
       allocator_block_t &operator=(const allocator_block_t &) = delete;
       MCPPALLOC_ALWAYS_INLINE allocator_block_t &operator=(allocator_block_t &&) noexcept;
       ~allocator_block_t();
-      /**
-       * \brief Return false if items are allocated.  Otherwise may return true or false.
-       *
-       * Return true if no items allocated.
-       * Return false if items are allocated or if no items are allocated and a collection is needed.
-       * Note the semantics here!
-      **/
-      bool empty() const noexcept;
-      /**
-       * \brief Return true if no more allocations can be performed.
-      **/
-      bool full() const noexcept;
-      /**
-       * \brief Begin iterator to allow bytewise iteration over memory block.
-      **/
-      uint8_t *begin() const noexcept;
-      /**
-       * \brief End iterator to allow bytewise iteration over memory block.
-      **/
-      uint8_t *end() const noexcept;
-      /**
-       * \brief Return size of memory.
-       **/
-      auto memory_size() const noexcept -> size_type;
-      /**
-       * \brief End iterator for object_states
-      **/
-      auto current_end() const noexcept -> object_state_type *;
-      /**
-       * \brief Return beginning object state.
-       *
-       * Produces undefined behavior if no valid object states.
-      **/
-      auto _object_state_begin() const noexcept -> object_state_type *;
-      /**
-       * \brief Find the object state associated with the given address.
-       *
-       * @return Associated object state, nullptr if not found.
-      **/
-      auto find_address(void *addr) const noexcept -> object_state_type *;
       /**
        * \brief Allocate size bytes on the block.
        *
@@ -158,13 +116,13 @@ namespace mcppalloc
        **/
       void _verify(const object_state_type *os);
       /**
-       * \brief Return true if valid, false otherwise.
-       **/
-      bool valid() const noexcept;
-      /**
        * \brief Clear all control structures and invalidate.
        **/
       void clear();
+      /**
+       * \brief Return true if no more allocations can be performed.
+       **/
+      bool full() const noexcept;
       /**
        * \brief Return minimum object allocation length.
       **/
@@ -193,31 +151,6 @@ namespace mcppalloc
 
     public:
       /**
-       * \brief Free list for this block.
-       *
-       * Uses control allocator for control data.
-       **/
-      ::boost::container::flat_set<object_state_type *,
-                                   ::mcppalloc::details::os_size_compare,
-                                   typename allocator::template rebind<object_state_type *>::other>
-          m_free_list;
-      /**
-       * \brief Next allocator pointer if whole block has not yet been used.
-      **/
-      object_state_type *m_next_alloc_ptr;
-      /**
-       * \brief End of memory block.
-      **/
-      uint8_t *m_end;
-      /**
-       * \brief Minimum object allocation length.
-      **/
-      size_t m_minimum_alloc_length;
-      /**
-       * \brief start of memory block.
-      **/
-      uint8_t *m_start;
-      /**
        * \brief Default user data option.
        *
        * The allocated memory is stored in control allocator.
@@ -235,7 +168,30 @@ namespace mcppalloc
        * This is at end as it is not needed for allocation (cache allignment).
        **/
       size_t m_maximum_alloc_length = 0;
+      /**
+       * \brief Free list for this block.
+       *
+       * Uses control allocator for control data.
+       **/
+      ::boost::container::flat_set<mcppalloc::details::object_state_base_t *,
+                                   mcppalloc::details::os_size_compare,
+                                   typename allocator::template rebind<mcppalloc::details::object_state_base_t *>::other>
+          m_free_list;
     };
+
+    template <typename Allocator_Policy>
+    inline bool allocator_block_t<Allocator_Policy>::full() const noexcept
+    {
+      return m_next_alloc_ptr == nullptr && m_free_list.empty();
+    }
+    template <typename Block_Policy>
+    void allocator_block_t<Block_Policy>::clear()
+    {
+      m_free_list.clear();
+      m_next_alloc_ptr = nullptr;
+      m_end = nullptr;
+      m_start = nullptr;
+    }
   }
 }
 #include "allocator_block_impl.hpp"

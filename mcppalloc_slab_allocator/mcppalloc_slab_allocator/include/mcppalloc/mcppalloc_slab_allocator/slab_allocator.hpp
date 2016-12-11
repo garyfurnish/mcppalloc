@@ -13,7 +13,7 @@
 namespace mcppalloc::slab_allocator::details
 {
   using mutex_type = mcpputil::mutex_t;
-  using slab_allocator_object_t = ::mcppalloc::details::object_state_t<default_allocator_policy_t<void>>;
+  using slab_allocator_object_t = ::mcppalloc::details::object_state_base_t;
   static_assert(::std::is_pod<slab_allocator_object_t>::value, "slab_allocator_object_t is not POD");
   /**
    * \brief This is a thread safe reentrant* slab allocator.

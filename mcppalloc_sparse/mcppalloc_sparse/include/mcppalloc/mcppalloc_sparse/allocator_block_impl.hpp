@@ -17,24 +17,15 @@ namespace mcppalloc::sparse::details
                                                                                  size_t length,
                                                                                  size_t minimum_alloc_length,
                                                                                  size_t maximum_alloc_length) noexcept
-      : m_next_alloc_ptr(reinterpret_cast<object_state_type *>(start)), m_end(reinterpret_cast<uint8_t *>(start) + length),
-        m_minimum_alloc_length(object_state_type::needed_size(sizeof(object_state_type), minimum_alloc_length)),
-        m_start(reinterpret_cast<uint8_t *>(start))
+      : sparse_allocator_block_base_t(start, length, minimum_alloc_length, sizeof(object_state_type))
   {
     // sanity check alignment of start.
-    if (mcpputil_unlikely(reinterpret_cast<size_t>(m_start) % minimum_header_alignment() != 0))
-      ::std::abort();
-    if (mcpputil_unlikely(reinterpret_cast<size_t>(m_end) % minimum_header_alignment() != 0))
-      ::std::abort();
     if (maximum_alloc_length == c_infinite_length) {
       m_maximum_alloc_length = maximum_alloc_length;
     } else {
       m_maximum_alloc_length = object_state_type::needed_size(sizeof(object_state_type), maximum_alloc_length);
     }
     assert(m_minimum_alloc_length <= m_maximum_alloc_length);
-    // setup first object state
-    m_next_alloc_ptr->set_all(reinterpret_cast<object_state_type *>(reinterpret_cast<uint8_t *>(start) + length), false, false,
-                              false);
 
     // setup default user data.
     m_default_user_data = mcpputil::allocator_unique_ptr_t<user_data_type, allocator>(&s_default_user_data);
@@ -42,9 +33,7 @@ namespace mcppalloc::sparse::details
   }
   template <typename Allocator_Policy>
   MCPPALLOC_ALWAYS_INLINE allocator_block_t<Allocator_Policy>::allocator_block_t(allocator_block_t &&block) noexcept
-      : m_free_list(::std::move(block.m_free_list)), m_next_alloc_ptr(::std::move(block.m_next_alloc_ptr)),
-        m_end(::std::move(block.m_end)), m_minimum_alloc_length(::std::move(block.m_minimum_alloc_length)),
-        m_start(::std::move(block.m_start)), m_default_user_data(::std::move(block.m_default_user_data)),
+      : sparse_allocator_block_base_t(::std::move(block)), m_default_user_data(::std::move(block.m_default_user_data)),
         m_last_max_alloc_available(::std::move(block.m_last_max_alloc_available)),
         m_maximum_alloc_length(::std::move(block.m_maximum_alloc_length))
   {
@@ -53,14 +42,11 @@ namespace mcppalloc::sparse::details
   MCPPALLOC_ALWAYS_INLINE allocator_block_t<Allocator_Policy> &allocator_block_t<Allocator_Policy>::
   operator=(allocator_block_t<Allocator_Policy> &&block) noexcept
   {
+    this->sparse_allocator_block_base_t::operator=(::std::move(block));
     if (m_default_user_data.get() == &s_default_user_data)
       m_default_user_data.release();
     m_default_user_data = ::std::move(block.m_default_user_data);
     m_free_list = std::move(block.m_free_list);
-    m_next_alloc_ptr = block.m_next_alloc_ptr;
-    m_end = block.m_end;
-    m_minimum_alloc_length = block.m_minimum_alloc_length;
-    m_start = block.m_start;
     m_last_max_alloc_available = block.m_last_max_alloc_available;
     m_maximum_alloc_length = block.m_maximum_alloc_length;
     // invalidate moved from block.
@@ -74,69 +60,6 @@ namespace mcppalloc::sparse::details
       m_default_user_data.release();
   }
 
-  template <typename Allocator_Policy>
-  void allocator_block_t<Allocator_Policy>::clear()
-  {
-    m_free_list.clear();
-    m_next_alloc_ptr = nullptr;
-    m_end = nullptr;
-    m_start = nullptr;
-  }
-  template <typename Allocator_Policy>
-  inline bool allocator_block_t<Allocator_Policy>::valid() const noexcept
-  {
-    return m_start != nullptr;
-  }
-  template <typename Allocator_Policy>
-  bool allocator_block_t<Allocator_Policy>::empty() const noexcept
-  {
-    if (!m_next_alloc_ptr)
-      return false;
-    return reinterpret_cast<uint8_t *>(m_next_alloc_ptr) == begin() && !m_next_alloc_ptr->next_valid();
-  }
-  template <typename Allocator_Policy>
-  inline bool allocator_block_t<Allocator_Policy>::full() const noexcept
-  {
-    return m_next_alloc_ptr == nullptr && m_free_list.empty();
-  }
-  template <typename Allocator_Policy>
-  MCPPALLOC_ALWAYS_INLINE uint8_t *allocator_block_t<Allocator_Policy>::begin() const noexcept
-  {
-    return m_start;
-  }
-  template <typename Allocator_Policy>
-  MCPPALLOC_ALWAYS_INLINE uint8_t *allocator_block_t<Allocator_Policy>::end() const noexcept
-  {
-    return m_end;
-  }
-  template <typename Allocator_Policy>
-  auto allocator_block_t<Allocator_Policy>::memory_size() const noexcept -> size_type
-  {
-    return static_cast<size_type>(end() - begin());
-  }
-  template <typename Allocator_Policy>
-  auto allocator_block_t<Allocator_Policy>::current_end() const noexcept -> object_state_type *
-  {
-    if (!m_next_alloc_ptr)
-      return reinterpret_cast<object_state_type *>(end());
-    else
-      return m_next_alloc_ptr;
-  }
-  template <typename Allocator_Policy>
-  MCPPALLOC_ALWAYS_INLINE auto allocator_block_t<Allocator_Policy>::_object_state_begin() const noexcept -> object_state_type *
-  {
-    return reinterpret_cast<object_state_type *>(begin());
-  }
-  template <typename Allocator_Policy>
-  auto allocator_block_t<Allocator_Policy>::find_address(void *addr) const noexcept -> object_state_type *
-  {
-    for (auto it = mcpputil::make_next_iterator(_object_state_begin()); it != mcpputil::make_next_iterator(current_end()); ++it) {
-      if (it->object_end() > addr) {
-        return it;
-      }
-    }
-    return nullptr;
-  }
   template <typename Allocator_Policy>
   void allocator_block_t<Allocator_Policy>::_verify([[maybe_unused]] const object_state_type *state)
   {
@@ -177,7 +100,7 @@ namespace mcppalloc::sparse::details
       // also deleting an item from the free list could involve lots of copying if at beginning of list.
       // finally free list is a vector so this should be cache friendly.
       for (auto it = m_free_list.rbegin(); it != m_free_list.rend(); ++it) {
-        object_state_type *const state = *it;
+        object_state_type *const state = static_cast<object_state_type *>(*it);
         state->verify_magic();
         // if it doesn't fit, move on to next one.
         if (state->object_size() < original_size)
@@ -216,43 +139,45 @@ namespace mcppalloc::sparse::details
     if (mcpputil_unlikely(!m_next_alloc_ptr))
       return allocation_return_type(block_type{nullptr, 0}, nullptr);
     // check to see we haven't requested an excessively large allocation.
-    if (m_next_alloc_ptr->next_valid()) {
-      if (mcpputil_unlikely(m_next_alloc_ptr->object_size() < original_size))
+    if (static_cast<object_state_type *>(m_next_alloc_ptr)->next_valid()) {
+      if (mcpputil_unlikely(static_cast<object_state_type *>(m_next_alloc_ptr)->object_size() < original_size))
         return allocation_return_type(block_type{nullptr, 0}, nullptr);
-    } else if (mcpputil_unlikely(static_cast<size_t>(end() - m_next_alloc_ptr->object_start()) < original_size))
+    } else if (mcpputil_unlikely(static_cast<size_t>(end() - static_cast<object_state_type *>(m_next_alloc_ptr)->object_start()) <
+                                 original_size))
       return allocation_return_type(block_type{nullptr, 0}, nullptr);
-    m_next_alloc_ptr->m_user_data = 0;
-    const auto ret_os = m_next_alloc_ptr;
+    static_cast<object_state_type *>(m_next_alloc_ptr)->m_user_data = 0;
+    const auto ret_os = static_cast<object_state_type *>(m_next_alloc_ptr);
     // see if we should split memory left over after this allocation.
     bool do_split = reinterpret_cast<uint8_t *>(next) + m_minimum_alloc_length <= end();
     if (do_split) {
       // enough memory is left over after allocation to have a minimum allocation.
       // so perform split.
-      next->set_all(m_next_alloc_ptr->next(), false, m_next_alloc_ptr->next_valid());
-      m_next_alloc_ptr->set_all(next, true, true);
-      m_next_alloc_ptr->set_user_data(m_default_user_data.get());
-      auto ret = m_next_alloc_ptr->object_start();
-      auto sz = m_next_alloc_ptr->object_size();
-      assert(m_next_alloc_ptr->object_size() >= original_size);
-      _verify(m_next_alloc_ptr);
-      assert(m_next_alloc_ptr->user_data());
+      next->set_all(static_cast<object_state_type *>(m_next_alloc_ptr)->next(), false,
+                    static_cast<object_state_type *>(m_next_alloc_ptr)->next_valid());
+      static_cast<object_state_type *>(m_next_alloc_ptr)->set_all(next, true, true);
+      static_cast<object_state_type *>(m_next_alloc_ptr)->set_user_data(m_default_user_data.get());
+      auto ret = static_cast<object_state_type *>(m_next_alloc_ptr)->object_start();
+      auto sz = static_cast<object_state_type *>(m_next_alloc_ptr)->object_size();
+      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->object_size() >= original_size);
+      _verify(static_cast<object_state_type *>(m_next_alloc_ptr));
+      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->user_data());
       m_next_alloc_ptr = next;
       _verify(next);
       return allocation_return_type(block_type{ret, sz}, ret_os);
     } else {
       // memory left over would be smaller then minimum allocation.
       // take all the memory.
-      m_next_alloc_ptr->set_all(reinterpret_cast<object_state_type *>(end()), true, false);
-      assert(m_next_alloc_ptr->next() == reinterpret_cast<object_state_type *>(end()));
-      m_next_alloc_ptr->set_user_data(m_default_user_data.get());
-      auto ret = m_next_alloc_ptr->object_start();
-      auto sz = m_next_alloc_ptr->object_size();
-      assert(m_next_alloc_ptr->object_size() >= original_size);
-      assert(m_next_alloc_ptr->next() == reinterpret_cast<object_state_type *>(end()));
-      _verify(m_next_alloc_ptr);
-      assert(m_next_alloc_ptr->user_data());
+      static_cast<object_state_type *>(m_next_alloc_ptr)->set_all(reinterpret_cast<object_state_type *>(end()), true, false);
+      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->next() == reinterpret_cast<object_state_type *>(end()));
+      static_cast<object_state_type *>(m_next_alloc_ptr)->set_user_data(m_default_user_data.get());
+      auto ret = static_cast<object_state_type *>(m_next_alloc_ptr)->object_start();
+      auto sz = static_cast<object_state_type *>(m_next_alloc_ptr)->object_size();
+      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->object_size() >= original_size);
+      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->next() == reinterpret_cast<object_state_type *>(end()));
+      _verify(static_cast<object_state_type *>(m_next_alloc_ptr));
+      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->user_data());
       m_next_alloc_ptr = nullptr;
-      _verify(m_next_alloc_ptr);
+      _verify(static_cast<object_state_type *>(m_next_alloc_ptr));
       return allocation_return_type(block_type{ret, sz}, ret_os);
     }
   }
@@ -268,7 +193,7 @@ namespace mcppalloc::sparse::details
   bool allocator_block_t<Allocator_Policy>::destroy(void *v, size_t &last_collapsed_size, size_t &last_max_alloc_available)
   {
     // get object state.
-    object_state_type *state = object_state_type::from_object_start(v);
+    object_state_type *state = object_state_type::template from_object_start<object_state_type>(v);
     state->verify_magic();
     // sanity check that addr belongs to this block.
     if (v < begin() || v >= end())
@@ -281,7 +206,7 @@ namespace mcppalloc::sparse::details
     }
     // no longer in use.
     state->set_in_use(false);
-    object_state_type *next = state->next();
+    object_state_type *next = state->template next<object_state_type>();
     // collapse states.
     while (state->next_valid() && !next->not_available()) {
       state->set_all(next->next(), false, next->next_valid());
@@ -289,7 +214,7 @@ namespace mcppalloc::sparse::details
       if (it != m_free_list.end()) {
         m_free_list.erase(it);
       }
-      next = next->next();
+      next = next->template next<object_state_type>();
     }
     if (state->next_valid()) {
       // if the next state is valid, then there are states after
@@ -318,7 +243,7 @@ namespace mcppalloc::sparse::details
                   mcpputil::align(sizeof(object_state_type), minimum_header_alignment());
     // then check size of all objects in free list.
     if (!m_free_list.empty()) {
-      const auto top_os = (*m_free_list.rbegin())->object_size();
+      const auto top_os = static_cast<object_state_type *>((*m_free_list.rbegin()))->object_size();
       max_alloc = ::std::max(max_alloc, top_os);
     }
     m_last_max_alloc_available = max_alloc;
@@ -356,7 +281,7 @@ namespace mcppalloc::sparse::details
           num_quasifreed++;
         }
         // ok, both this state and next one available, so merge them.
-        object_state_type *const next = state->next();
+        object_state_type *const next = state->template next<object_state_type>();
         // perform merge.
         state->set_next(next->next());
         state->set_next_valid(next->next_valid());
@@ -367,13 +292,13 @@ namespace mcppalloc::sparse::details
       } else {
         // move onto next state since can't merge.
         _verify(state);
-        _verify(state->next());
+        _verify(state->template next<object_state_type>());
         if (needs_insert) {
           // put in free list.
           last_insert_point = m_free_list.insert(state).first;
           needs_insert = false;
         }
-        state = state->next();
+        state = state->template next<object_state_type>();
         did_merge = false;
       }
     }
