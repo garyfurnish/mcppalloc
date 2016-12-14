@@ -27,8 +27,9 @@ namespace mcppalloc::sparse::details
     for (auto &&it : allocator.m_blocks) {
       // it is a fatal error to try to double add and something is inconsistent.  Terminate before memory corruption
       // spreads.
-      if (it.m_block == &block)
+      if (it.m_block == &block) {
         ::std::abort();
+      }
       // it is a fatal error to try to double add and something is inconsistent.  Terminate before memory corruption
       // spreads.
       if (it.m_begin == block.begin()) {

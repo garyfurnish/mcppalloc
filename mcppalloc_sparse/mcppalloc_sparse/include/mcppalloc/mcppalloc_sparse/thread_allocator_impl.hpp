@@ -65,8 +65,9 @@ namespace mcppalloc::sparse::details
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
   size_t thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::find_block_set_id(size_t sz)
   {
-    if (sz <= 16)
+    if (sz <= 16) {
       return 0;
+    }
     sz = sz >> 4;
     // This is guarenteed to be positive.
     size_t id = static_cast<size_t>(64 - mcpputil_builtin_clz1(sz));
@@ -79,10 +80,12 @@ namespace mcppalloc::sparse::details
   {
     // we want minimums to be page size compatible.
     size_t min_size = mcpputil::slab_t::page_size();
-    if (min_size <= 4096 * 4)
+    if (min_size <= 4096 * 4) {
       min_size = 4096 * 4;
-    if (min_size > 4096 * 128)
+    }
+    if (min_size > 4096 * 128) {
       min_size = 4096 * 128;
+    }
     for (size_t i = 0; i < c_bins; ++i) {
       auto &abs_data = m_allocator_multiples[i];
       // guarentee multiple is positive integer.
@@ -97,8 +100,9 @@ namespace mcppalloc::sparse::details
       // based on the numbers we use for multiple, generate min and max allocation sizes.
       size_t min = static_cast<size_t>(1) << (i + 3);
       size_t max = (static_cast<size_t>(1) << (i + 4)) - 1;
-      if (i == c_bins - 1)
+      if (i == c_bins - 1) {
         max = c_infinite_length;
+      }
       m_allocators[i]._set_allocator_sizes(min, max);
     }
   }
@@ -106,11 +110,13 @@ namespace mcppalloc::sparse::details
   bool thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::set_allocator_multiple(size_t id, size_t multiple)
   {
     // sanity check id.
-    if (id > c_bins)
+    if (id > c_bins) {
       return false;
+    }
     // sanity check multiple.
-    if (multiple > ::std::numeric_limits<uint32_t>().max())
+    if (multiple > ::std::numeric_limits<uint32_t>().max()) {
       return false;
+    }
     m_allocator_multiples[id].set_allocator_multiple(static_cast<uint32_t>(multiple));
     return true;
   }
@@ -118,8 +124,9 @@ namespace mcppalloc::sparse::details
   size_t thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::get_allocator_multiple(size_t id) noexcept
   {
     // sanity check id.
-    if (id > c_bins)
+    if (id > c_bins) {
       return 0;
+    }
     // return multiple.
     return m_allocator_multiples[id].allocator_multiple();
   }
@@ -140,8 +147,9 @@ namespace mcppalloc::sparse::details
   {
     // build an array in place, this should get optimized away.
     ::std::array<size_t, c_bins> array;
-    for (size_t id = 0; id < c_bins; ++id)
+    for (size_t id = 0; id < c_bins; ++id) {
       array[id] = get_allocator_block_size(id);
+    }
     return array;
   }
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
@@ -224,8 +232,9 @@ namespace mcppalloc::sparse::details
     _check_do_free_empty_blocks();
     // find allocation set for allocation size.
     size_t id = find_block_set_id(sz);
-    if (mcpputil_unlikely(sz < ::mcpputil::c_alignment))
+    if (mcpputil_unlikely(sz < ::mcpputil::c_alignment)) {
       sz = ::mcpputil::c_alignment;
+    }
     // try allocation.
     allocation_return_type ret = m_allocators[id].allocate(sz);
     // if successful returned.
@@ -265,8 +274,9 @@ namespace mcppalloc::sparse::details
     // figre out how much memory to request.
 
     size_t memory_request = get_allocator_block_size(id);
-    if (memory_request < sz * 3)
+    if (memory_request < sz * 3) {
       memory_request = sz * 3;
+    }
     // Get the allocator for the size requested.
     auto &abs = m_allocators[id];
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_allocator._mutex());
@@ -330,16 +340,18 @@ namespace mcppalloc::sparse::details
   auto thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::primary_memory_used() const noexcept -> size_type
   {
     size_type sz = 0;
-    for (auto &&allocator : m_allocators)
+    for (auto &&allocator : m_allocators) {
       sz += allocator.primary_memory_used();
+    }
     return sz;
   }
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
   auto thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::secondary_memory_used() const noexcept -> size_type
   {
     size_type sz = secondary_memory_used_self();
-    for (auto &&allocator : m_allocators)
+    for (auto &&allocator : m_allocators) {
       sz += allocator.secondary_memory_used();
+    }
     return sz;
   }
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
@@ -350,8 +362,9 @@ namespace mcppalloc::sparse::details
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
   void thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::shrink_secondary_memory_usage_to_fit()
   {
-    for (auto &&allocator : m_allocators)
+    for (auto &&allocator : m_allocators) {
       allocator.shrink_secondary_memory_usage_to_fit();
+    }
   }
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
   void thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::shrink_secondary_memory_usage_to_fit_self()
@@ -372,8 +385,9 @@ namespace mcppalloc::sparse::details
     }
     {
       ::std::stringstream ss;
-      for (auto sz : allocator_block_sizes())
+      for (auto sz : allocator_block_sizes()) {
         ss << sz << ",";
+      }
       ptree.put("block_sizes", ss.str());
     }
     ptree.put("primary_memory_used", ::std::to_string(primary_memory_used()));
