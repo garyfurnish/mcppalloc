@@ -13,8 +13,9 @@ namespace mcppalloc::bitmap_allocator::details
   bitmap_allocator_t<Allocator_Policy>::bitmap_allocator_t(size_t size, size_t size_hint) : m_slab(size, size_hint)
   {
     m_thread_allocator_by_manager_id.resize(gsl::narrow<size_t>(mcpputil::thread_id_manager_t::gs().max_threads()));
-    for (auto &&ptr : m_thread_allocator_by_manager_id)
+    for (auto &&ptr : m_thread_allocator_by_manager_id) {
       ptr = nullptr;
+    }
     m_slab.align_next(c_bitmap_block_size);
   }
   template <typename Allocator_Policy>
@@ -29,8 +30,9 @@ namespace mcppalloc::bitmap_allocator::details
     m_types.clear();
     m_thread_allocators.clear();
     m_free_globals.clear();
-    for (auto &&package_it : m_globals)
+    for (auto &&package_it : m_globals) {
       package_it.second.shutdown();
+    }
     {
       auto a1 = ::std::move(m_thread_allocators);
       auto a4 = ::std::move(m_types);
@@ -73,8 +75,9 @@ namespace mcppalloc::bitmap_allocator::details
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     auto ttla = get_ttla();
-    if (ttla)
+    if (ttla) {
       return *ttla;
+    }
     // static initialization could have caused this to spuriously fail, so check that.
     {
       const auto existing = m_thread_allocators.find(::std::this_thread::get_id());
@@ -103,8 +106,9 @@ namespace mcppalloc::bitmap_allocator::details
       set_ttla(nullptr);
       auto it = m_thread_allocators.find(::std::this_thread::get_id());
       // check to make sure it was initialized at some point.
-      if (it == m_thread_allocators.end())
+      if (it == m_thread_allocators.end()) {
         return;
+      }
       // just move the owning pointer into ptr.
       // this guarentees it will be erased when this function returns.
       ptr = std::move(it->second);
@@ -138,8 +142,9 @@ namespace mcppalloc::bitmap_allocator::details
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     auto it = m_globals.find(type);
-    if (mcpputil_unlikely(it == m_globals.end()))
+    if (mcpputil_unlikely(it == m_globals.end())) {
       return 0;
+    }
     return it->second.m_vectors[id].m_vector.size();
   }
   template <typename Allocator_Policy>
@@ -151,8 +156,9 @@ namespace mcppalloc::bitmap_allocator::details
   auto bitmap_allocator_t<Allocator_Policy>::get_type(type_id_t type_id) -> const bitmap_type_info_t &
   {
     auto it = m_types.find(type_id);
-    if (it == m_types.end())
+    if (it == m_types.end()) {
       throw ::std::runtime_error("mcppalloc: bitmap_allocator::get_type 8c622768-3fe5-4338-b9a3-1db6b9d2ba98");
+    }
     return it->second;
   }
 
@@ -208,9 +214,11 @@ namespace mcppalloc::bitmap_allocator::details
   void bitmap_allocator_t<Allocator_Policy>::_for_all_state(Predicate &&predicate)
   {
     MCPPALLOC_CONCURRENCY_LOCK_ASSUME(m_mutex);
-    for (auto &&thread : m_thread_allocators)
+    for (auto &&thread : m_thread_allocators) {
       thread.second->for_all_state(predicate);
-    for (auto &&package_it : m_globals)
+    }
+    for (auto &&package_it : m_globals) {
       package_it.second.for_all(::std::forward<Predicate>(predicate));
+    }
   }
 }

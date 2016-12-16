@@ -158,8 +158,9 @@ namespace mcppalloc::sparse::details
     auto it = ::std::lower_bound(m_blocks.begin(), m_blocks.end(), v, end_val_compare);
     size_t last_collapsed_size = 0;
     size_t prev_last_max_alloc_available = 0;
-    if (it == m_blocks.end())
+    if (it == m_blocks.end()) {
       return false;
+    }
     if (it->destroy(v, last_collapsed_size, prev_last_max_alloc_available)) {
       if (&*it != last_block() && !it->full()) {
         // find the block.
@@ -270,12 +271,14 @@ namespace mcppalloc::sparse::details
     // adjust available blocks.
     const auto ait =
         ::std::find_if(m_available_blocks.begin(), m_available_blocks.end(), [&it](auto &&abp) { return abp.second == &*it; });
-    if (ait != m_available_blocks.end())
+    if (ait != m_available_blocks.end()) {
       m_available_blocks.erase(ait);
+    }
     // adjust all pointers.
     for (auto &&ab : m_available_blocks) {
-      if (ab.second >= &*it)
+      if (ab.second >= &*it) {
         ab.second--;
+      }
     }
     // use lock functional.
     lock_func();
@@ -290,8 +293,9 @@ namespace mcppalloc::sparse::details
         auto back_it = m_available_blocks.end() - 1;
         m_last_block = back_it->second;
         m_available_blocks.erase(back_it);
-      } else
+      } else {
         m_last_block = nullptr;
+      }
     } else if (last_block() > &*it) {
       m_last_block--;
     }
@@ -308,10 +312,11 @@ namespace mcppalloc::sparse::details
   {
     sparse_allocator_block_set_verifier_t::verify_all(*this);
     size_t reserve_sz;
-    if (sz == 0 || sz < m_blocks.size())
+    if (sz == 0 || sz < m_blocks.size()) {
       reserve_sz = m_blocks.size() * 2;
-    else
+    } else {
       reserve_sz = sz;
+    }
 
     auto offset = mcpputil::grow_by_reserve(m_blocks, reserve_sz);
     // adjust location of available blocks by adding offset to each.
@@ -331,16 +336,18 @@ namespace mcppalloc::sparse::details
   auto allocator_block_set_t<Allocator_Policy>::primary_memory_used() const noexcept -> size_t
   {
     size_t sz = 0;
-    for (auto &&block : m_blocks)
+    for (auto &&block : m_blocks) {
       sz += block.memory_size();
+    }
     return sz;
   }
   template <typename Allocator_Policy>
   auto allocator_block_set_t<Allocator_Policy>::secondary_memory_used() const noexcept -> size_t
   {
     size_t sz = 0;
-    for (auto &&block : m_blocks)
+    for (auto &&block : m_blocks) {
       sz += block.secondary_memory_used();
+    }
     sz += secondary_memory_used_self();
     return sz;
   }
@@ -356,8 +363,9 @@ namespace mcppalloc::sparse::details
   void allocator_block_set_t<Allocator_Policy>::shrink_secondary_memory_usage_to_fit()
   {
     shrink_secondary_memory_usage_to_fit_self();
-    for (auto &&block : m_blocks)
+    for (auto &&block : m_blocks) {
       block.shrink_secondary_memory_usage_to_fit();
+    }
   }
   template <typename Allocator_Policy>
   void allocator_block_set_t<Allocator_Policy>::shrink_secondary_memory_usage_to_fit_self()

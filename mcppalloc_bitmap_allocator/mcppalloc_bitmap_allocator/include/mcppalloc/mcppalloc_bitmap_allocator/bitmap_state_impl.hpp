@@ -55,8 +55,9 @@ namespace mcppalloc::bitmap_allocator::details
     free_bits_ref().fill(::std::numeric_limits<uint64_t>::max());
     m_internal.m_info.m_cached_first_free = 0;
     m_internal.m_info.m_package = package;
-    for (size_t i = 0; i < num_user_bit_fields(); ++i)
+    for (size_t i = 0; i < num_user_bit_fields(); ++i) {
       clear_user_bits(i);
+    }
   }
   inline void bitmap_state_t::clear_mark_bits() noexcept
   {
@@ -108,15 +109,15 @@ namespace mcppalloc::bitmap_allocator::details
   inline void bitmap_state_t::set_free(size_t i, bool val) noexcept
   {
     free_bits_ref().set_bit(i, val);
-    if (val)
+    if (val) {
       m_internal.m_info.m_cached_first_free = ::std::min(i, m_internal.m_info.m_cached_first_free);
-    else if (i == m_internal.m_info.m_cached_first_free) {
+    } else if (i == m_internal.m_info.m_cached_first_free) {
       // not free
-      if (i + 1 >= size())
+      if (i + 1 >= size()) {
         m_internal.m_info.m_cached_first_free = ::std::numeric_limits<size_t>::max();
-      else if (is_free(i + 1))
+      } else if (is_free(i + 1)) {
         m_internal.m_info.m_cached_first_free++;
-      else {
+      } else {
         // could be anywhere
         _compute_first_free();
       }
@@ -187,8 +188,9 @@ namespace mcppalloc::bitmap_allocator::details
     auto i = first_free();
     // guarentee the memory address exists somewhere that is visible to gc
     volatile auto memory_address = begin() + real_entry_size() * i;
-    if (i >= size())
+    if (i >= size()) {
       return nullptr;
+    }
     set_free(i, false);
     // this awful code is because for a conservative gc
     // we could set free before memory_address is live.
@@ -208,16 +210,19 @@ namespace mcppalloc::bitmap_allocator::details
   inline bool bitmap_state_t::deallocate(void *vv) noexcept
   {
     auto v = reinterpret_cast<uint8_t *>(vv);
-    if (v < begin() || v > end())
+    if (v < begin() || v > end()) {
       return false;
+    }
     size_t byte_diff = static_cast<size_t>(v - begin());
-    if (mcpputil_unlikely(byte_diff % real_entry_size()))
+    if (mcpputil_unlikely(byte_diff % real_entry_size())) {
       return false;
+    }
     mcpputil::secure_zero_stream(v, real_entry_size());
     auto i = byte_diff / real_entry_size();
     set_free(i, true);
-    for (size_t j = 0; j < num_user_bit_fields(); ++j)
+    for (size_t j = 0; j < num_user_bit_fields(); ++j) {
       user_bits_ref(j).set_bit(i, false);
+    }
     return true;
   }
   inline void bitmap_state_t::or_with_to_be_freed(bitmap::dynamic_bitmap_ref_t<false> to_be_freed)

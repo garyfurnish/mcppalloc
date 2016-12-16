@@ -23,12 +23,13 @@ namespace mcppalloc::sparse::details
     template <typename A, typename B>
     constexpr auto operator()(const ::std::pair<A, B> &lhs, const ::std::pair<A, B> &rhs) const -> bool
     {
-      if (lhs.first < rhs.first)
+      if (lhs.first < rhs.first) {
         return true;
-      else if (lhs.first == rhs.first)
+      } else if (lhs.first == rhs.first) {
         return lhs.second < rhs.second;
-      else
+      } else {
         return false;
+      }
     }
   };
 }

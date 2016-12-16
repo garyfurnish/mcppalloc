@@ -164,12 +164,13 @@ namespace mcppalloc
     struct os_size_compare {
       inline auto operator()(const details::object_state_base_t *a, const details::object_state_base_t *b) const noexcept -> bool
       {
-        if (a->object_size() < b->object_size())
+        if (a->object_size() < b->object_size()) {
           return true;
-        else if (a->object_size() == b->object_size())
+        } else if (a->object_size() == b->object_size()) {
           return a < b;
-        else
+        } else {
           return false;
+        }
       }
     };
   }

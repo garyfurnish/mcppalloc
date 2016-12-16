@@ -17,8 +17,9 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   allocator_t<Allocator_Policy>::~allocator_t()
   {
-    if (!m_shutdown)
+    if (!m_shutdown) {
       shutdown();
+    }
     assert(m_shutdown);
   }
   template <typename Allocator_Policy>
@@ -54,13 +55,15 @@ namespace mcppalloc::sparse::details
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     // sanity check heap size.
-    if (m_initial_gc_heap_size)
+    if (m_initial_gc_heap_size) {
       return false;
+    }
     m_initial_gc_heap_size = initial_gc_heap_size;
     m_minimum_expansion_size = m_initial_gc_heap_size;
     // try to allocate at a location that has room for expansion.
-    if (!m_slab.allocate(m_initial_gc_heap_size, mcpputil::slab_t::find_hole(max_heap_size)))
+    if (!m_slab.allocate(m_initial_gc_heap_size, mcpputil::slab_t::find_hole(max_heap_size))) {
       return false;
+    }
     // setup current end point (nothing used yet).
     m_current_end = m_slab.begin();
     sparse_allocator_verifier_t::verify_blocks_sorted(*this);
@@ -95,9 +98,9 @@ namespace mcppalloc::sparse::details
       if (!free_pair.empty()) {
         auto ub = ::std::upper_bound(m_free_list.begin(), m_free_list.end(), free_pair,
                                      mcpputil::system_memory_range_t::size_comparator());
-        if (m_current_end == free_pair.end())
+        if (m_current_end == free_pair.end()) {
           m_current_end = free_pair.begin();
-        else {
+        } else {
           m_free_list.emplace(ub, free_pair);
         }
       }
@@ -109,7 +112,9 @@ namespace mcppalloc::sparse::details
     auto sz_available = m_slab.end() - m_current_end;
     // heap out of memory.
     if (sz_available < 0) // shouldn't happen
+    {
       ::std::abort();
+    }
     if (static_cast<size_t>(sz_available) >= sz) {
       // recalculate used end.
       uint8_t *new_end = m_current_end + sz;
@@ -124,10 +129,12 @@ namespace mcppalloc::sparse::details
     // we need to expand the heap.
     assert(m_current_end <= m_slab.end());
     size_t expansion_size = ::std::max(m_slab.size() + m_minimum_expansion_size, m_slab.size() + sz);
-    if (expansion_size > max_heap_size())
+    if (expansion_size > max_heap_size()) {
       return {};
-    if (!try_expand)
+    }
+    if (!try_expand) {
       return {};
+    }
     if (!m_slab.expand(expansion_size)) {
       ::std::cerr << "Unable to expand slab to " << expansion_size << ::std::endl;
       // unable to expand heap so return error condition.
@@ -399,14 +406,16 @@ namespace mcppalloc::sparse::details
     // guarenteed that moving backwards one works because uniqueness.
     auto ub = ::std::upper_bound(m_blocks.begin(), m_blocks.end(), handle, block_handle_begin_compare_t{});
     // if we are already at beginning though, we can't do that.
-    if (ub == m_blocks.begin())
+    if (ub == m_blocks.begin()) {
       return nullptr;
+    }
     ub--;
     assert(ub->m_block->begin() <= addr);
     // check that the previous block does not end before the address.
     // this could happen if the block the address belonged to was destroyed.
-    if (ub->m_block->end() <= addr)
+    if (ub->m_block->end() <= addr) {
       return nullptr;
+    }
     sparse_allocator_verifier_t::verify_blocks_sorted(*this);
     ;
     // get address stored in iterator.
@@ -419,8 +428,9 @@ namespace mcppalloc::sparse::details
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     // if there is not already memory for global blocks, reserve a bunch.
     // this is done because moving them is non-trivial.
-    if (!m_global_blocks.capacity())
+    if (!m_global_blocks.capacity()) {
       m_global_blocks.reserve(20000);
+    }
     // grab the old block address.
     auto old_block_addr = &block;
     // move the block into global blocks.
@@ -460,12 +470,14 @@ namespace mcppalloc::sparse::details
   {
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     // first check to see if it is past end of used slab.
-    if (_u_current_end() <= pair.begin() && pair.end() <= underlying_memory().end())
+    if (_u_current_end() <= pair.begin() && pair.end() <= underlying_memory().end()) {
       return true;
+    }
     // otherwise check to see if it is in some interval in the free list.
     for (auto &&fpair : m_free_list) {
-      if (fpair.contains(pair))
+      if (fpair.contains(pair)) {
         return true;
+      }
     }
     return false;
   }
@@ -575,8 +587,9 @@ namespace mcppalloc::sparse::details
     ;
     // first check to see if there is already a thread allocator for this thread.
     auto it = m_thread_allocators.find(::std::this_thread::get_id());
-    if (it != m_thread_allocators.end())
+    if (it != m_thread_allocators.end()) {
       return *it->second;
+    }
     // one doesn't already exist.
     // create a thread allocator.
     thread_allocator_unique_ptr_t ta = mcpputil::make_unique_allocator<this_thread_allocator_t, allocator>(*this);
@@ -598,8 +611,9 @@ namespace mcppalloc::sparse::details
       // find ta entry.
       auto it = m_thread_allocators.find(::std::this_thread::get_id());
       // check to make sure it was initialized at some point.
-      if (it == m_thread_allocators.end())
+      if (it == m_thread_allocators.end()) {
         return;
+      }
       // just move the owning pointer into ptr.
       // this guarentees it will be erased when this function returns.
       ptr = std::move(it->second);
@@ -627,8 +641,9 @@ namespace mcppalloc::sparse::details
     // this doesn't really free these objects.
     // instead it just marks the state that it should be freed in the future.
     for (auto &&os : container) {
-      if (os)
+      if (os) {
         os->set_quasi_freed();
+      }
     }
     // clear the container per function spec.
     container.clear();
@@ -736,8 +751,9 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   void allocator_t<Allocator_Policy>::_u_set_force_free_empty_blocks()
   {
-    for (auto &&pair : m_thread_allocators)
+    for (auto &&pair : m_thread_allocators) {
       pair.second->set_force_free_empty_blocks();
+    }
   }
   template <typename Allocator_Policy>
   auto allocator_t<Allocator_Policy>::max_heap_size() const noexcept -> size_type

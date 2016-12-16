@@ -20,11 +20,13 @@ namespace mcppalloc::bitmap_allocator::details
   {
     sz -= 1;
     sz = sz >> min_2;
-    if (!sz)
+    if (!sz) {
       return 0;
+    }
     size_t ret = 64 - mcpputil::clz(sz);
-    if (ret > max_bins)
+    if (ret > max_bins) {
       ret = ::std::numeric_limits<size_t>::max();
+    }
     return ret;
   }
   template <typename Allocator_Policy>
@@ -116,10 +118,11 @@ namespace mcppalloc::bitmap_allocator::details
     auto it = ::std::find(vec.begin(), vec.end(), state);
     if (it == vec.end()) {
       auto fit = ::std::find(entry.m_full_vector.begin(), entry.m_full_vector.end(), state);
-      if (fit == vec.end())
+      if (fit == vec.end()) {
         return false;
-      else
+      } else {
         entry.m_full_vector.erase(fit);
+      }
     } else {
       vec.erase(it);
     }

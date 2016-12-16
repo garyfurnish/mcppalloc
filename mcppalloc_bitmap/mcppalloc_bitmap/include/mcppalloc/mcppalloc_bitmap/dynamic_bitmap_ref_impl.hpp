@@ -21,10 +21,12 @@ namespace mcppalloc::bitmap
   template <bool is_const>
   inline dynamic_bitmap_ref_t<is_const> &dynamic_bitmap_ref_t<is_const>::deep_copy(const dynamic_bitmap_ref_t<is_const> &rhs)
   {
-    if (mcpputil_unlikely(rhs.size() != size()))
+    if (mcpputil_unlikely(rhs.size() != size())) {
       throw ::std::runtime_error("mcppalloc: dynamic_bitmap_ref_t: bad operator=: 19f0d9b7-200f-46ae-9b73-9b874ed11045");
-    for (size_t i = 0; i < rhs.size(); ++i)
+    }
+    for (size_t i = 0; i < rhs.size(); ++i) {
       m_array[i] = rhs.m_array[i];
+    }
     return *this;
   }
   template <bool is_const>
@@ -56,14 +58,16 @@ namespace mcppalloc::bitmap
   template <bool E>
   typename ::std::enable_if<E, void>::type dynamic_bitmap_ref_t<is_const>::clear() noexcept
   {
-    for (size_t i = 0; i < size(); ++i)
+    for (size_t i = 0; i < size(); ++i) {
       m_array[i].clear();
+    }
   }
   template <bool is_const>
   inline void dynamic_bitmap_ref_t<is_const>::fill(uint64_t word) noexcept
   {
-    for (size_t i = 0; i < size(); ++i)
+    for (size_t i = 0; i < size(); ++i) {
       m_array[i].fill(word);
+    }
   }
   template <bool is_const>
   inline void dynamic_bitmap_ref_t<is_const>::set_bit(size_t i, bool value) noexcept
@@ -98,8 +102,9 @@ namespace mcppalloc::bitmap
   {
     for (size_t i = 0; i < size(); ++i) {
       auto &&it = m_array[i];
-      if (it.any_set())
+      if (it.any_set()) {
         return true;
+      }
     }
     return false;
   }
@@ -108,8 +113,9 @@ namespace mcppalloc::bitmap
   {
     for (size_t i = 0; i < size(); ++i) {
       auto &&it = m_array[i];
-      if (!it.all_set())
+      if (!it.all_set()) {
         return false;
+      }
     }
     return true;
   }
@@ -118,8 +124,9 @@ namespace mcppalloc::bitmap
   {
     for (size_t i = 0; i < size(); ++i) {
       auto &&it = m_array[i];
-      if (it.any_set())
+      if (it.any_set()) {
         return false;
+      }
     }
     return true;
   }
@@ -130,23 +137,28 @@ namespace mcppalloc::bitmap
     const size_t rounded_max = (size() / 4) * 4;
     while (i < rounded_max) {
       auto ret = m_array[i].first_set();
-      if (ret != ::std::numeric_limits<size_t>::max())
+      if (ret != ::std::numeric_limits<size_t>::max()) {
         return i * bits_type::size_in_bits() + ret;
+      }
       ret = m_array[i + 1].first_set();
-      if (ret != ::std::numeric_limits<size_t>::max())
+      if (ret != ::std::numeric_limits<size_t>::max()) {
         return (i + 1) * bits_type::size_in_bits() + ret;
+      }
       ret = m_array[i + 2].first_set();
-      if (ret != ::std::numeric_limits<size_t>::max())
+      if (ret != ::std::numeric_limits<size_t>::max()) {
         return (i + 2) * bits_type::size_in_bits() + ret;
+      }
       ret = m_array[i + 3].first_set();
-      if (ret != ::std::numeric_limits<size_t>::max())
+      if (ret != ::std::numeric_limits<size_t>::max()) {
         return (i + 3) * bits_type::size_in_bits() + ret;
+      }
       i += 4;
     }
     for (; i < size(); ++i) {
       auto ret = m_array[i].first_set();
-      if (ret != ::std::numeric_limits<size_t>::max())
+      if (ret != ::std::numeric_limits<size_t>::max()) {
         return i * bits_type::size_in_bits() + ret;
+      }
     }
     return ::std::numeric_limits<size_t>::max();
   }
@@ -155,8 +167,9 @@ namespace mcppalloc::bitmap
   {
     for (size_t i = 0; i < size(); ++i) {
       auto ret = m_array[i].first_not_set();
-      if (ret != ::std::numeric_limits<size_t>::max())
+      if (ret != ::std::numeric_limits<size_t>::max()) {
         return i * bits_type::size_in_bits() + ret;
+      }
     }
     return ::std::numeric_limits<size_t>::max();
   }
@@ -221,8 +234,9 @@ namespace mcppalloc::bitmap
         done = true;
       }
       m_array[block].for_set_bits(block * bits_type::size_in_bits(), internal_limit, ::std::move(func));
-      if (done)
+      if (done) {
         break;
+      }
     }
     /*      for (size_t i = first_set(); i < limit; ++i) {
 if (get_bit(i))

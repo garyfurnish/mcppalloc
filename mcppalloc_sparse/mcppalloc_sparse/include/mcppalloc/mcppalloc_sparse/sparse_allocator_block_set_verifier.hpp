@@ -97,13 +97,15 @@ namespace mcppalloc::sparse::details
         ::std::cerr << "available blocks not sorted\n";
         ::std::cerr << "bad: \n";
         for (auto it = abs.m_available_blocks.begin(); it != abs.m_available_blocks.end() - 1; ++it) {
-          if (!compare(*it, *(it + 1)))
+          if (!compare(*it, *(it + 1))) {
             ::std::cerr << static_cast<size_t>(it - abs.m_available_blocks.begin()) << " " << it->first << " " << it->second
                         << " " << (it + 1)->first << " " << (it + 1)->second;
+          }
         }
         ::std::cerr << "all: \n";
-        for (auto &&ab : abs.m_available_blocks)
+        for (auto &&ab : abs.m_available_blocks) {
           ::std::cerr << ab.first << " " << &ab.second << " ";
+        }
         ::std::abort();
         return;
       }

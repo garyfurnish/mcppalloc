@@ -67,8 +67,9 @@ namespace mcppalloc::bitmap_allocator::details
   template <typename Allocator_Policy>
   void bitmap_thread_allocator_t<Allocator_Policy>::do_maintenance()
   {
-    for (auto &&pair : m_locals)
+    for (auto &&pair : m_locals) {
       do_maintenance(pair.second);
+    }
   }
   template <typename Allocator_Policy>
   void bitmap_thread_allocator_t<Allocator_Policy>::do_maintenance(package_type &package)
@@ -83,8 +84,9 @@ namespace mcppalloc::bitmap_allocator::details
         if (state->all_free()) {
           m_free_list.push_back(state);
           it = vec.m_vector.erase(it);
-        } else
+        } else {
           ++it;
+        }
       }
     }
     size_t id = 0;
@@ -93,9 +95,10 @@ namespace mcppalloc::bitmap_allocator::details
       // move extra in use to global.
       for (auto &&state : vec.m_vector) {
         const auto pop_count = state->free_popcount();
-        if (pop_count > state->size() / 2 || mcpputil_unlikely(m_in_destructor))
+        if (pop_count > state->size() / 2 || mcpputil_unlikely(m_in_destructor)) {
           // approximately half free.
           num_potential_moves++;
+        }
       }
       if (num_potential_moves > m_max_in_use) {
         auto num_to_be_moved = num_potential_moves - m_max_in_use;
@@ -182,10 +185,11 @@ namespace mcppalloc::bitmap_allocator::details
           ::mcppalloc::details::allocation_failure_t failure{attempts++};
           auto action = m_allocator.allocator_policy().on_allocation_failure(failure);
           expand = action.m_attempt_expand;
-          if (action.m_repeat)
+          if (action.m_repeat) {
             goto RESTART;
-          else
+          } else {
             throw ::std::bad_alloc();
+          }
         }
         state->verify_magic();
         state->m_internal.m_info = package_type::_get_info(id);
@@ -222,8 +226,9 @@ namespace mcppalloc::bitmap_allocator::details
       }
       bool success = package.remove(id, state);
       // if it fails it could be anywhere.
-      if (!success)
+      if (!success) {
         return true;
+      }
       m_free_list.push_back(state);
     }
     return true;
@@ -250,8 +255,9 @@ namespace mcppalloc::bitmap_allocator::details
   template <typename Allocator_Policy>
   void bitmap_thread_allocator_t<Allocator_Policy>::_check_maintenance()
   {
-    if (mcpputil_unlikely(m_force_maintenance.load(::std::memory_order_relaxed)))
+    if (mcpputil_unlikely(m_force_maintenance.load(::std::memory_order_relaxed))) {
       do_maintenance();
+    }
   }
   template <typename Allocator_Policy>
   void bitmap_thread_allocator_t<Allocator_Policy>::to_ptree(::boost::property_tree::ptree &ptree, int level)
@@ -274,8 +280,9 @@ namespace mcppalloc::bitmap_allocator::details
   template <typename Predicate>
   void bitmap_thread_allocator_t<Allocator_Policy>::for_all_state(Predicate &predicate)
   {
-    for (auto &&package : m_locals)
+    for (auto &&package : m_locals) {
       for_all_state(predicate, package.second);
+    }
   }
   template <typename Allocator_Policy>
   template <typename Predicate>

@@ -56,25 +56,30 @@ namespace mcppalloc::bitmap::details
   MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::all_set() const noexcept -> bool
   {
     for (auto &&val : m_array) {
-      if (val != ::std::numeric_limits<value_type>::max())
+      if (val != ::std::numeric_limits<value_type>::max()) {
         return false;
+      }
     }
     return true;
   }
   template <size_t Quads>
   MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::any_set() const noexcept -> bool
   {
-    for (auto &&it : m_array)
-      if (it)
+    for (auto &&it : m_array) {
+      if (it) {
         return true;
+      }
+    }
     return false;
   }
   template <size_t Quads>
   MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::none_set() const noexcept -> bool
   {
-    for (auto &&it : m_array)
-      if (it)
+    for (auto &&it : m_array) {
+      if (it) {
         return false;
+      }
+    }
     return true;
   }
   template <size_t Quads>
@@ -110,8 +115,9 @@ namespace mcppalloc::bitmap::details
     for (size_t i = 0; i < m_array.size(); ++i) {
       const uint64_t &it = m_array[i];
       auto first = mcpputil::ffs(it);
-      if (first)
+      if (first) {
         return (64 * i) + (first - 1);
+      }
     }
 #endif
     return ::std::numeric_limits<size_t>::max();
@@ -131,15 +137,17 @@ namespace mcppalloc::bitmap::details
   MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::operator~() const noexcept -> integer_block_t
   {
     integer_block_t ret = *this;
-    for (auto &&i : ret.m_array)
+    for (auto &&i : ret.m_array) {
       i = ~i;
+    }
     return ret;
   }
   template <size_t Quads>
   MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::negate() noexcept -> integer_block_t &
   {
-    for (auto &&i : m_array)
+    for (auto &&i : m_array) {
       i = ~i;
+    }
     return *this;
   }
   template <size_t Quads>
@@ -198,10 +206,12 @@ namespace mcppalloc::bitmap::details
   {
     limit = ::std::min(limit, size_in_bits());
     for (size_t i = 0; i < limit; ++i) {
-      if (i % 64 == 0 && m_array[i / 64] == 0)
+      if (i % 64 == 0 && m_array[i / 64] == 0) {
         continue;
-      if (get_bit(i))
+      }
+      if (get_bit(i)) {
         func(offset + i);
+      }
     }
   }
 

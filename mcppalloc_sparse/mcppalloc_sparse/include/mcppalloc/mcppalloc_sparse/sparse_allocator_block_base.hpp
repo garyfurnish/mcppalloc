@@ -107,10 +107,12 @@ namespace mcppalloc::sparse::details
         m_object_state_type_size(object_state_type_size), m_start(reinterpret_cast<uint8_t *>(start))
 
   {
-    if (mcpputil_unlikely(reinterpret_cast<size_t>(m_start) % minimum_header_alignment() != 0))
+    if (mcpputil_unlikely(reinterpret_cast<size_t>(m_start) % minimum_header_alignment() != 0)) {
       ::std::abort();
-    if (mcpputil_unlikely(reinterpret_cast<size_t>(m_end) % minimum_header_alignment() != 0))
+    }
+    if (mcpputil_unlikely(reinterpret_cast<size_t>(m_end) % minimum_header_alignment() != 0)) {
       ::std::abort();
+    }
     // setup first object state
     static_cast<mcppalloc::details::object_state_base_t *>(m_next_alloc_ptr)
         ->set_all(reinterpret_cast<mcppalloc::details::object_state_base_t *>(reinterpret_cast<uint8_t *>(start) + length), false,
@@ -125,8 +127,9 @@ namespace mcppalloc::sparse::details
   template <typename Block_Policy>
   bool sparse_allocator_block_base_t<Block_Policy>::empty() const noexcept
   {
-    if (!m_next_alloc_ptr)
+    if (!m_next_alloc_ptr) {
       return false;
+    }
     return reinterpret_cast<uint8_t *>(m_next_alloc_ptr) == begin() && !m_next_alloc_ptr->next_valid();
   }
   template <typename Block_Policy>
@@ -153,10 +156,11 @@ namespace mcppalloc::sparse::details
   template <typename Block_Policy>
   auto sparse_allocator_block_base_t<Block_Policy>::current_end() const noexcept -> ::mcppalloc::details::object_state_base_t *
   {
-    if (!m_next_alloc_ptr)
+    if (!m_next_alloc_ptr) {
       return reinterpret_cast<::mcppalloc::details::object_state_base_t *>(end());
-    else
+    } else {
       return m_next_alloc_ptr;
+    }
   }
   template <typename Block_Policy>
   auto sparse_allocator_block_base_t<Block_Policy>::find_address(void *addr) const noexcept
