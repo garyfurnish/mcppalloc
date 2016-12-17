@@ -58,7 +58,7 @@ void allocator_tests()
       AssertThat(allocator->_d_free_list(), HasLength(0));
       allocator->release_memory(memory3);
       allocator->release_memory(memory2_new);
-      AssertThat(allocator->current_end() != allocator->begin(), IsTrue());
+      AssertThat(allocator->current_end() != allocator->underlying_memory().begin(), IsTrue());
       auto vec = allocator->_d_free_list();
 
       allocator->collapse();
@@ -71,7 +71,8 @@ void allocator_tests()
       allocator->collapse();
       vec = allocator->_d_free_list();
       AssertThat(allocator->_d_free_list(), HasLength(0));
-      AssertThat(static_cast<void *>(allocator->current_end()), Equals(static_cast<void *>(allocator->begin())));
+      AssertThat(static_cast<void *>(allocator->current_end()),
+                 Equals(static_cast<void *>(allocator->underlying_memory().begin())));
       //*/
     });
     it("test3", []() {
