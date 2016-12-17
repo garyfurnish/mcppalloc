@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdlib>
 #include <mcppalloc/object_state.hpp>
 #include <mcpputil/mcpputil/boost/container/flat_set.hpp>
 #include <mcpputil/mcpputil/function_iterator.hpp>
