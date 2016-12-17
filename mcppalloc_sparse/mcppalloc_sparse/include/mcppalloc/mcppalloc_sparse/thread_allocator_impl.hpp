@@ -221,22 +221,22 @@ namespace mcppalloc::sparse::details
     return m_allocators;
   }
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
-  auto thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::allocate(size_t sz) -> block_type
+  auto thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::allocate(size_t size) -> block_type
   {
-    return ::std::get<0>(allocate_detailed(sz));
+    return ::std::get<0>(allocate_detailed(size));
   }
 
   template <typename Global_Allocator, typename Allocator_Thread_Policy>
-  auto thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::allocate_detailed(size_t sz) -> allocation_return_type
+  auto thread_allocator_t<Global_Allocator, Allocator_Thread_Policy>::allocate_detailed(size_t size) -> allocation_return_type
   {
     _check_do_free_empty_blocks();
     // find allocation set for allocation size.
-    size_t id = find_block_set_id(sz);
-    if (mcpputil_unlikely(sz < ::mcpputil::c_alignment)) {
-      sz = ::mcpputil::c_alignment;
+    size_t id = find_block_set_id(size);
+    if (mcpputil_unlikely(size < ::mcpputil::c_alignment)) {
+      size = ::mcpputil::c_alignment;
     }
     // try allocation.
-    allocation_return_type ret = m_allocators[id].allocate(sz);
+    allocation_return_type ret = m_allocators[id].allocate(size);
     // if successful returned.
     if (allocation_valid(ret)) {
       m_allocator.thread_policy().on_allocation(get_allocated_memory(ret), get_allocated_size(ret));
@@ -244,7 +244,7 @@ namespace mcppalloc::sparse::details
     }
     size_t attempts = 1;
     bool try_expand = true;
-    bool success = _add_allocator_block(id, sz, try_expand);
+    bool success = _add_allocator_block(id, size, try_expand);
     while (mcpputil_unlikely(!success)) {
       auto action = m_allocator.thread_policy().on_allocation_failure({attempts});
       if (!action.m_repeat) {
@@ -252,13 +252,13 @@ namespace mcppalloc::sparse::details
       }
       ++attempts;
       try_expand = action.m_attempt_expand;
-      success = _add_allocator_block(id, sz, try_expand);
+      success = _add_allocator_block(id, size, try_expand);
     }
     if (!success) {
       ::std::cerr << "mcppalloc: Out of memory, aborting 09c30c8d-2cfa-4646-a562-24f06560fa5c\n" << ::std::endl;
       ::std::terminate();
     }
-    ret = m_allocators[id].allocate(sz);
+    ret = m_allocators[id].allocate(size);
     if (mcpputil_unlikely(!allocation_valid(ret))) // should be impossible.
     {
       ::std::cerr << "mcppalloc: Allocation failed in an impossible fashion.  6bfbf787-3443-47c5-8726-e49d7836315a\n";

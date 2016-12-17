@@ -25,11 +25,11 @@ namespace mcppalloc::sparse::details
     {
       if (lhs.first < rhs.first) {
         return true;
-      } else if (lhs.first == rhs.first) {
-        return lhs.second < rhs.second;
-      } else {
-        return false;
       }
+      if (lhs.first == rhs.first) {
+        return lhs.second < rhs.second;
+      }
+      return false;
     }
   };
 }

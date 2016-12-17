@@ -90,7 +90,7 @@ namespace mcppalloc::bitmap_allocator::details
     // create a thread allocator.
     thread_allocator_unique_ptr_type ta = mcpputil::make_unique_allocator<thread_allocator_type, internal_allocator_type>(*this);
     // get a reference to thread allocator.
-    auto &ret = *ta.get();
+    auto &ret = *ta;
     set_ttla(&ret);
     // put the thread allocator in the thread allocator list.
     m_thread_allocators.emplace(::std::this_thread::get_id(), ::std::move(ta));

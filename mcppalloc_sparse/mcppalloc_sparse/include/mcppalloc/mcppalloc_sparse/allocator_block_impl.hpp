@@ -1,6 +1,6 @@
 #pragma once
 #include "allocator_block.hpp"
-#include <assert.h>
+#include <cassert>
 #include <mcppalloc/block.hpp>
 #include <mcppalloc/user_data_base.hpp>
 #include <mcpputil/mcpputil/boost/property_tree/ptree.hpp>
@@ -170,22 +170,21 @@ namespace mcppalloc::sparse::details
       m_next_alloc_ptr = next;
       _verify(next);
       return allocation_return_type(block_type{ret, sz}, ret_os);
-    } else {
-      // memory left over would be smaller then minimum allocation.
-      // take all the memory.
-      static_cast<object_state_type *>(m_next_alloc_ptr)->set_all(reinterpret_cast<object_state_type *>(end()), true, false);
-      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->next() == reinterpret_cast<object_state_type *>(end()));
-      static_cast<object_state_type *>(m_next_alloc_ptr)->set_user_data(m_default_user_data.get());
-      auto ret = static_cast<object_state_type *>(m_next_alloc_ptr)->object_start();
-      auto sz = static_cast<object_state_type *>(m_next_alloc_ptr)->object_size();
-      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->object_size() >= original_size);
-      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->next() == reinterpret_cast<object_state_type *>(end()));
-      _verify(static_cast<object_state_type *>(m_next_alloc_ptr));
-      assert(static_cast<object_state_type *>(m_next_alloc_ptr)->user_data());
-      m_next_alloc_ptr = nullptr;
-      _verify(static_cast<object_state_type *>(m_next_alloc_ptr));
-      return allocation_return_type(block_type{ret, sz}, ret_os);
     }
+    // memory left over would be smaller then minimum allocation.
+    // take all the memory.
+    static_cast<object_state_type *>(m_next_alloc_ptr)->set_all(reinterpret_cast<object_state_type *>(end()), true, false);
+    assert(static_cast<object_state_type *>(m_next_alloc_ptr)->next() == reinterpret_cast<object_state_type *>(end()));
+    static_cast<object_state_type *>(m_next_alloc_ptr)->set_user_data(m_default_user_data.get());
+    auto ret = static_cast<object_state_type *>(m_next_alloc_ptr)->object_start();
+    auto sz = static_cast<object_state_type *>(m_next_alloc_ptr)->object_size();
+    assert(static_cast<object_state_type *>(m_next_alloc_ptr)->object_size() >= original_size);
+    assert(static_cast<object_state_type *>(m_next_alloc_ptr)->next() == reinterpret_cast<object_state_type *>(end()));
+    _verify(static_cast<object_state_type *>(m_next_alloc_ptr));
+    assert(static_cast<object_state_type *>(m_next_alloc_ptr)->user_data());
+    m_next_alloc_ptr = nullptr;
+    _verify(static_cast<object_state_type *>(m_next_alloc_ptr));
+    return allocation_return_type(block_type{ret, sz}, ret_os);
   }
   template <typename Allocator_Policy>
   bool allocator_block_t<Allocator_Policy>::destroy(void *v)

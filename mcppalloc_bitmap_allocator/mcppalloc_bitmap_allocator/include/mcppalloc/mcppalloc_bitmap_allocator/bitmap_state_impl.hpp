@@ -322,7 +322,7 @@ namespace mcppalloc::bitmap_allocator::details
   {
     auto diff = reinterpret_cast<const uint8_t *>(v) - begin();
     if (mcpputil_unlikely(diff < 0)) {
-      assert(0);
+      assert(false);
       return ::std::numeric_limits<size_t>::max();
     }
     const auto index = static_cast<size_t>(diff) / real_entry_size();

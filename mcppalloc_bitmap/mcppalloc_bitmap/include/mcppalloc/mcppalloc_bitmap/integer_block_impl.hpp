@@ -115,7 +115,7 @@ namespace mcppalloc::bitmap::details
     for (size_t i = 0; i < m_array.size(); ++i) {
       const uint64_t &it = m_array[i];
       auto first = mcpputil::ffs(it);
-      if (first) {
+      if (first != 0) {
         return (64 * i) + (first - 1);
       }
     }

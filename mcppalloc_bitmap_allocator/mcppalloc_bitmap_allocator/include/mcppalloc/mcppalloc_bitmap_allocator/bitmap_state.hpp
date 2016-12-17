@@ -61,7 +61,7 @@ namespace mcppalloc::bitmap_allocator::details
      * \brief Set the bitmap package that owns this state.
      **/
     template <typename Allocator_Policy>
-    void set_bitmap_package(bitmap_package_t<Allocator_Policy> *policy) noexcept;
+    void set_bitmap_package(bitmap_package_t<Allocator_Policy> *package) noexcept;
     /**
      * \brief Return the bitmap package that owns this state.
      **/
@@ -119,9 +119,9 @@ namespace mcppalloc::bitmap_allocator::details
     void set_marked(size_t i) noexcept;
 
     void *allocate() noexcept;
-    bool deallocate(void *v) noexcept;
+    bool deallocate(void *vv) noexcept;
 
-    void or_with_to_be_freed(bitmap::dynamic_bitmap_ref_t<false> ref);
+    void or_with_to_be_freed(bitmap::dynamic_bitmap_ref_t<false> to_be_freed);
     void free_unmarked();
     /**
      * \brief Return number of blocks in each bit field.

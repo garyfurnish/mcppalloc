@@ -166,11 +166,11 @@ namespace mcppalloc
       {
         if (a->object_size() < b->object_size()) {
           return true;
-        } else if (a->object_size() == b->object_size()) {
-          return a < b;
-        } else {
-          return false;
         }
+        if (a->object_size() == b->object_size()) {
+          return a < b;
+        }
+        return false;
       }
     };
   }

@@ -112,9 +112,9 @@ namespace mcppalloc
        * \brief Verify object state os.
        *
        * Code may optimize out in release mode.
-       * @param os Object state to verify.
+       * @param state Object state to verify.
        **/
-      void _verify(const object_state_type *os);
+      void _verify(const object_state_type *state);
       /**
        * \brief Clear all control structures and invalidate.
        **/

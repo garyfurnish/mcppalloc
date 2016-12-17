@@ -177,32 +177,31 @@ namespace mcppalloc::bitmap_allocator::details
         m_allocator.allocator_policy().on_allocation(ret.m_ptr, ret.m_size);
         state->verify_magic();
         return ret;
-      } else {
-        // free list empty
-        auto &type_info = m_allocator.get_type(package.type_id());
-        bitmap_state_t *state = m_allocator._get_memory();
-        if (!state) {
-          ::mcppalloc::details::allocation_failure_t failure{attempts++};
-          auto action = m_allocator.allocator_policy().on_allocation_failure(failure);
-          expand = action.m_attempt_expand;
-          if (action.m_repeat) {
-            goto RESTART;
-          } else {
-            throw ::std::bad_alloc();
-          }
-        }
-        state->verify_magic();
-        state->m_internal.m_info = package_type::_get_info(id);
-        state->initialize(package.type_id(), type_info.num_user_bits(), &package);
-        assert(state->first_free() == 0);
-
-        ret.m_ptr = state->allocate();
-        ret.m_size = state->real_entry_size();
-        package.insert(id, state);
-        m_allocator.allocator_policy().on_allocation(ret.m_ptr, ret.m_size);
-        state->verify_magic();
-        return ret;
       }
+      // free list empty
+      auto &type_info = m_allocator.get_type(package.type_id());
+      bitmap_state_t *state = m_allocator._get_memory();
+      if (state == nullptr) {
+        ::mcppalloc::details::allocation_failure_t failure{attempts++};
+        auto action = m_allocator.allocator_policy().on_allocation_failure(failure);
+        expand = action.m_attempt_expand;
+        if (action.m_repeat) {
+          goto RESTART;
+        } else {
+          throw ::std::bad_alloc();
+        }
+      }
+      state->verify_magic();
+      state->m_internal.m_info = package_type::_get_info(id);
+      state->initialize(package.type_id(), type_info.num_user_bits(), &package);
+      assert(state->first_free() == 0);
+
+      ret.m_ptr = state->allocate();
+      ret.m_size = state->real_entry_size();
+      package.insert(id, state);
+      m_allocator.allocator_policy().on_allocation(ret.m_ptr, ret.m_size);
+      state->verify_magic();
+      return ret;
     }
     assert(ret.m_size >= sz);
     m_allocator.allocator_policy().on_allocation(ret.m_ptr, ret.m_size);

@@ -137,7 +137,7 @@ namespace mcppalloc::sparse
        * @param create_sz Size of block requested.
        * @param minimum_alloc_length Minimum allocation length for block.
        * @param maximum_alloc_length Maximum allocation length for block.
-       * @param destination Returned allocator block.
+       * @param out_block Returned allocator block.
        * @param try_expand Attempt to expand underlying slab if necessary
        * @return True on success, false on failure.
       **/
@@ -146,7 +146,7 @@ namespace mcppalloc::sparse
                                                size_t minimum_alloc_length,
                                                size_t maximum_alloc_length,
                                                size_t allocate_size,
-                                               allocator_block_type &destination,
+                                               allocator_block_type &out_block,
                                                bool try_expand) REQUIRES(m_mutex);
 
       /**
@@ -415,12 +415,13 @@ namespace mcppalloc::sparse
        *
        * This function moves existing blocks in m_blocks to a new appropriate location.
        * This saves the number of searches required from O(num blocks) to O(sets of contiguous blocks).
-       * @param num Number of contiguous blocks.
+       * @param num_contiguous Number of contiguous blocks.
        * @param new_location Beginning of new location of blocks on outside.
        * @param lb Lower bound where the blocks are currently in m_blocks.
        **/
       template <typename Iterator, typename LB>
-      void _u_move_registered_blocks_contiguous(size_t num, const Iterator &new_location, const LB &lb) REQUIRES(m_mutex);
+      void _u_move_registered_blocks_contiguous(size_t num_contiguous, const Iterator &new_location, const LB &lb)
+          REQUIRES(m_mutex);
 
       /**
        * \brief Unregister a registered allocator block before moving/destruction without locking.

@@ -84,7 +84,7 @@ namespace mcppalloc::sparse::details
     ;
     sz = mcpputil::align(sz, mcpputil::c_alignment);
     // do worst fit memory vector lookup
-    typename memory_range_vector_t::iterator worst = m_free_list.end();
+    auto worst = m_free_list.end();
     auto find_pair = mcpputil::system_memory_range_t(nullptr, reinterpret_cast<uint8_t *>(sz));
     worst = last_greater_equal_than(m_free_list.begin(), m_free_list.end(), find_pair,
                                     mcpputil::system_memory_range_t::size_comparator());
@@ -157,18 +157,18 @@ namespace mcppalloc::sparse::details
                                                                           size_t create_sz,
                                                                           size_t minimum_alloc_length,
                                                                           size_t maximum_alloc_length,
-                                                                          size_t allocate_sz,
-                                                                          allocator_block_type &block,
+                                                                          size_t allocate_size,
+                                                                          allocator_block_type &out_block,
                                                                           bool try_expand)
   {
     // first check to see if we can find a partially used block that fits parameters.
-    auto found_block = _u_find_global_allocator_block(allocate_sz, minimum_alloc_length, maximum_alloc_length);
+    auto found_block = _u_find_global_allocator_block(allocate_size, minimum_alloc_length, maximum_alloc_length);
     if (found_block != m_global_blocks.end()) {
       // reuse old block.
       auto old_block_addr = &*found_block;
       _u_unregister_allocator_block(*old_block_addr);
       // move old block into new address.
-      block = ::std::move(*found_block);
+      out_block = ::std::move(*found_block);
       // move block registration.
       //          _u_move_registered_block(old_block_addr, &block);
       // figure out location in vector that shifted.
@@ -182,7 +182,7 @@ namespace mcppalloc::sparse::details
       return true;
     }
     // otherwise just create a new block
-    return _u_create_allocator_block(ta, create_sz, minimum_alloc_length, maximum_alloc_length, block, try_expand);
+    return _u_create_allocator_block(ta, create_sz, minimum_alloc_length, maximum_alloc_length, out_block, try_expand);
   }
   template <typename Allocator_Policy>
   bool allocator_t<Allocator_Policy>::_u_create_allocator_block(this_thread_allocator_t &ta,
@@ -332,13 +332,13 @@ namespace mcppalloc::sparse::details
 
   template <typename Allocator_Policy>
   template <typename Iterator, typename LB>
-  void allocator_t<Allocator_Policy>::_u_move_registered_blocks_contiguous(size_t contiguous,
+  void allocator_t<Allocator_Policy>::_u_move_registered_blocks_contiguous(size_t num_contiguous,
                                                                            const Iterator &new_location,
                                                                            const LB &lb)
   {
 
     this_allocator_block_handle_t new_handle;
-    auto adj_location = new_location + static_cast<ptrdiff_t>(contiguous - 1);
+    auto adj_location = new_location + static_cast<ptrdiff_t>(num_contiguous - 1);
     new_handle.initialize(lb->m_thread_allocator, &*adj_location, adj_location->begin());
 
     // uniqueness guarentees this is correct insertion point.
@@ -347,10 +347,10 @@ namespace mcppalloc::sparse::details
     // thus we can use rotate to create an empty location to modify.
     // this is the optimal solution for moving in this fashion.
     if (mcpputil_likely(ub > lb)) {
-      ::std::rotate(lb, lb + static_cast<ptrdiff_t>(contiguous), ub);
-      for (size_t i = contiguous; i > 0; --i) {
+      ::std::rotate(lb, lb + static_cast<ptrdiff_t>(num_contiguous), ub);
+      for (size_t i = num_contiguous; i > 0; --i) {
         auto ub_offset = static_cast<ptrdiff_t>(i);
-        auto new_location_offset = static_cast<ptrdiff_t>(contiguous - i);
+        auto new_location_offset = static_cast<ptrdiff_t>(num_contiguous - i);
         (ub - ub_offset)->m_block = &*(new_location + new_location_offset);
       }
     } else {
@@ -394,14 +394,14 @@ namespace mcppalloc::sparse::details
     }
   }
   template <typename Allocator_Policy>
-  auto allocator_t<Allocator_Policy>::_u_find_block(void *in_addr) -> const this_allocator_block_handle_t *
+  auto allocator_t<Allocator_Policy>::_u_find_block(void *addr) -> const this_allocator_block_handle_t *
   {
-    uint8_t *addr = reinterpret_cast<uint8_t *>(in_addr);
+    uint8_t *our_addr = reinterpret_cast<uint8_t *>(addr);
     sparse_allocator_verifier_t::verify_blocks_sorted(*this);
     ;
     // create fake block handle to search for.
     this_allocator_block_handle_t handle;
-    handle.initialize(nullptr, nullptr, addr);
+    handle.initialize(nullptr, nullptr, our_addr);
     // note we find the ub, then move backwards one.
     // guarenteed that moving backwards one works because uniqueness.
     auto ub = ::std::upper_bound(m_blocks.begin(), m_blocks.end(), handle, block_handle_begin_compare_t{});
@@ -410,10 +410,10 @@ namespace mcppalloc::sparse::details
       return nullptr;
     }
     ub--;
-    assert(ub->m_block->begin() <= addr);
+    assert(ub->m_block->begin() <= our_addr);
     // check that the previous block does not end before the address.
     // this could happen if the block the address belonged to was destroyed.
-    if (ub->m_block->end() <= addr) {
+    if (ub->m_block->end() <= our_addr) {
       return nullptr;
     }
     sparse_allocator_verifier_t::verify_blocks_sorted(*this);
@@ -457,11 +457,10 @@ namespace mcppalloc::sparse::details
       m_current_end = pair.begin();
       assert(m_current_end <= m_slab.end());
       return;
-    } else {
-      auto ub =
-          ::std::upper_bound(m_free_list.begin(), m_free_list.end(), pair, mcpputil::system_memory_range_t::size_comparator());
-      m_free_list.insert(ub, pair);
     }
+    auto ub =
+        ::std::upper_bound(m_free_list.begin(), m_free_list.end(), pair, mcpputil::system_memory_range_t::size_comparator());
+    m_free_list.insert(ub, pair);
     sparse_allocator_verifier_t::verify_blocks_sorted(*this);
     ;
   }
@@ -594,7 +593,7 @@ namespace mcppalloc::sparse::details
     // create a thread allocator.
     thread_allocator_unique_ptr_t ta = mcpputil::make_unique_allocator<this_thread_allocator_t, allocator>(*this);
     // get a reference to thread allocator.
-    auto &ret = *ta.get();
+    auto &ret = *ta;
     // put the thread allocator in the thread allocator list.
     m_thread_allocators.emplace(::std::this_thread::get_id(), ::std::move(ta));
     return ret;

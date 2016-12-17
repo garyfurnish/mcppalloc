@@ -9,7 +9,7 @@ namespace mcppalloc::bitmap_allocator::details
   constexpr const size_t min_2 = 5;
   constexpr const size_t max_bins = 4;
 
-  inline size_t fits_in_bins(size_t sz)
+  inline bool fits_in_bins(size_t sz)
   {
     sz -= 1;
     sz = sz >> min_2;
@@ -20,7 +20,7 @@ namespace mcppalloc::bitmap_allocator::details
   {
     sz -= 1;
     sz = sz >> min_2;
-    if (!sz) {
+    if (sz == 0) {
       return 0;
     }
     size_t ret = 64 - mcpputil::clz(sz);
@@ -51,10 +51,9 @@ namespace mcppalloc::bitmap_allocator::details
       if (ret.m_ptr) {
         ret.m_size = packed.real_entry_size();
         return ret;
-      } else {
-        entry.m_full_vector.push_back(&packed);
-        vec.pop_back();
       }
+      entry.m_full_vector.push_back(&packed);
+      vec.pop_back();
     }
     entry.m_times_since_full_search++;
     if (entry.m_times_since_full_search == 50) {
@@ -120,9 +119,8 @@ namespace mcppalloc::bitmap_allocator::details
       auto fit = ::std::find(entry.m_full_vector.begin(), entry.m_full_vector.end(), state);
       if (fit == vec.end()) {
         return false;
-      } else {
-        entry.m_full_vector.erase(fit);
       }
+      entry.m_full_vector.erase(fit);
     } else {
       vec.erase(it);
     }
@@ -139,7 +137,7 @@ namespace mcppalloc::bitmap_allocator::details
       // move out any free vectors.
       auto it = ::std::partition(vec.begin(), vec.end(), [](auto &&obj) { return !obj->all_free(); });
       size_t num_to_move = static_cast<size_t>(vec.end() - it);
-      if (num_to_move) {
+      if (num_to_move != 0) {
         free_list.insert(free_list.end(), ::std::make_move_iterator(it), ::std::make_move_iterator(vec.end()));
         vec.resize(vec.size() - num_to_move);
       }

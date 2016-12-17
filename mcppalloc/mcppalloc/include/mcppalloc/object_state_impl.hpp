@@ -52,7 +52,7 @@ namespace mcppalloc
     }
     MCPPALLOC_ALWAYS_INLINE bool object_state_base_t::in_use() const noexcept
     {
-      return m_next & 1;
+      return (m_next & 1) != 0;
     }
     MCPPALLOC_ALWAYS_INLINE bool object_state_base_t::quasi_freed() const noexcept
     {
@@ -95,8 +95,8 @@ namespace mcppalloc
     }
     MCPPALLOC_ALWAYS_INLINE uint8_t *object_state_base_t::object_start(size_type alignment) const noexcept
     {
-      return const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(this) +
-                                   mcpputil::align(sizeof(object_state_base_t), alignment));
+      return const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(this) +                 // NOLINT
+                                   mcpputil::align(sizeof(object_state_base_t), alignment)); // NOLINT
     }
     MCPPALLOC_ALWAYS_INLINE auto object_state_base_t::object_size(size_type alignment) const noexcept -> size_type
     {

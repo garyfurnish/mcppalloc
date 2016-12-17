@@ -127,7 +127,7 @@ namespace mcppalloc::sparse::details
   template <typename Block_Policy>
   bool sparse_allocator_block_base_t<Block_Policy>::empty() const noexcept
   {
-    if (!m_next_alloc_ptr) {
+    if (m_next_alloc_ptr == nullptr) {
       return false;
     }
     return reinterpret_cast<uint8_t *>(m_next_alloc_ptr) == begin() && !m_next_alloc_ptr->next_valid();
@@ -156,11 +156,10 @@ namespace mcppalloc::sparse::details
   template <typename Block_Policy>
   auto sparse_allocator_block_base_t<Block_Policy>::current_end() const noexcept -> ::mcppalloc::details::object_state_base_t *
   {
-    if (!m_next_alloc_ptr) {
+    if (m_next_alloc_ptr == nullptr) {
       return reinterpret_cast<::mcppalloc::details::object_state_base_t *>(end());
-    } else {
-      return m_next_alloc_ptr;
     }
+    return m_next_alloc_ptr;
   }
   template <typename Block_Policy>
   auto sparse_allocator_block_base_t<Block_Policy>::find_address(void *addr) const noexcept
