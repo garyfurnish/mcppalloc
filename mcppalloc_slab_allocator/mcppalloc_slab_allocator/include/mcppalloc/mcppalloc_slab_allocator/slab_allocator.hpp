@@ -36,7 +36,7 @@ namespace mcppalloc::slab_allocator::details
     using memory_range_type = mcpputil::memory_range_t<pointer_type>;
 
     static inline constexpr const size_t cs_alignment = 64;
-    static inline constexpr const size_t cs_header_sz = mcpputil::align(sizeof(slab_allocator_object_t), cs_alignment);
+    static inline constexpr const size_t cs_header_sz = mcpputil::cs_align(sizeof(slab_allocator_object_t), cs_alignment);
     static constexpr size_t alignment() noexcept;
     static_assert(cs_header_sz == 64, "");
     /**
@@ -106,7 +106,7 @@ namespace mcppalloc::slab_allocator::details
      * @param sz Size of object allocation required.
      * @return Start of object memory.
      **/
-    void *_u_allocate_raw_at_end(size_t sz) REQUIRES(m_mutex);
+    void *_u_allocate_raw_at_end(ptrdiff_t sz) REQUIRES(m_mutex);
     /**
      * \brief Allocate memory.
      *

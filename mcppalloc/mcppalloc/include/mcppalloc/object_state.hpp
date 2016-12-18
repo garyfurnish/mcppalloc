@@ -2,6 +2,7 @@
 #include "allocator_policy.hpp"
 #include "declarations.hpp"
 #include "default_allocator_policy.hpp"
+#include <gsl/gsl>
 #include <mcpputil/mcpputil/alignment.hpp>
 #include <memory>
 #include <type_traits>
@@ -30,8 +31,12 @@ namespace mcppalloc
       /**
        * \brief Return the total size needed for an allocation of object state of sz with header_sz.
        **/
-      static constexpr size_type needed_size(size_type header_sz, size_type sz, size_type alignment = cs_alignment)
+      static size_type needed_size(size_type header_sz, size_type sz, size_type alignment = cs_alignment)
       {
+        ::gsl::narrow<ptrdiff_t>(header_sz);
+	if(::gsl::narrow_cast<ptrdiff_t>(sz)<0)
+	  return ::std::numeric_limits<size_type>::max();
+        ::gsl::narrow<ptrdiff_t>(sz);
         return mcpputil::align(header_sz, alignment) + mcpputil::align(sz, alignment);
       }
       /**
