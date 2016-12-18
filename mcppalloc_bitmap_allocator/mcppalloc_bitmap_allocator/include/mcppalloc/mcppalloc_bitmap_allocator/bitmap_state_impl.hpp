@@ -186,11 +186,11 @@ namespace mcppalloc::bitmap_allocator::details
     size_t retries = 0;
   RESTART:
     auto i = first_free();
-    // guarentee the memory address exists somewhere that is visible to gc
-    volatile auto memory_address = begin() + real_entry_size() * i;
     if (i >= size()) {
       return nullptr;
     }
+    // guarentee the memory address exists somewhere that is visible to gc
+    volatile auto memory_address = begin() + real_entry_size() * i;
     set_free(i, false);
     // this awful code is because for a conservative gc
     // we could set free before memory_address is live.

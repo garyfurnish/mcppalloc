@@ -29,7 +29,7 @@ namespace mcppalloc::slab_allocator::details
     uint8_t *new_end = mcpputil::unsafe_cast<uint8_t>(mcpputil::align(m_end, sz));
     auto offset = (new_end - mcpputil::unsafe_cast<uint8_t>(m_end)) - ::gsl::narrow<ptrdiff_t>(cs_header_sz);
     if (offset < 0)
-      offset += sz;
+      offset += ::gsl::narrow<ptrdiff_t>(sz);
     allocate_raw(::gsl::narrow<size_t>(offset));
   }
   void slab_allocator_t::_u_add_free(slab_allocator_object_t *v)
