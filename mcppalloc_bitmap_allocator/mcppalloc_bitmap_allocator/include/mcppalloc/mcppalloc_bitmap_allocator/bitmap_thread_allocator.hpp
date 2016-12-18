@@ -57,7 +57,7 @@ namespace mcppalloc::bitmap_allocator::details
     using locals_pair_type = typename ::std::pair<type_id_t, package_type>;
     using locals_allocator_type = typename internal_allocator_traits::template rebind_alloc<locals_pair_type>;
     ::boost::container::flat_map<type_id_t, package_type, ::std::less<type_id_t>, locals_allocator_type> m_locals;
-    ::std::atomic<bool> m_force_maintenance;
+    ::std::atomic<bool> m_force_maintenance{false};
     mcpputil::rebind_vector_t<void *, internal_allocator_type> m_free_list;
     bitmap_allocator_t<allocator_policy_type> &m_allocator;
     ::std::array<size_t, package_type::cs_num_vectors> m_popcount_max;

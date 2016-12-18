@@ -34,8 +34,8 @@ namespace mcppalloc
       static size_type needed_size(size_type header_sz, size_type sz, size_type alignment = cs_alignment)
       {
         ::gsl::narrow<ptrdiff_t>(header_sz);
-	if(::gsl::narrow_cast<ptrdiff_t>(sz)<0)
-	  return ::std::numeric_limits<size_type>::max();
+        if (::gsl::narrow_cast<ptrdiff_t>(sz) < 0)
+          return ::std::numeric_limits<size_type>::max();
         ::gsl::narrow<ptrdiff_t>(sz);
         return mcpputil::align(header_sz, alignment) + mcpputil::align(sz, alignment);
       }
