@@ -27,8 +27,10 @@ namespace mcppalloc::slab_allocator::details
   void slab_allocator_t::align_next(size_t sz)
   {
     uint8_t *new_end = mcpputil::unsafe_cast<uint8_t>(mcpputil::align(m_end, sz));
-    auto offset = static_cast<size_t>(new_end - mcpputil::unsafe_cast<uint8_t>(m_end)) - cs_header_sz;
-    allocate_raw(offset);
+    auto offset = (new_end - mcpputil::unsafe_cast<uint8_t>(m_end)) - ::gsl::narrow<ptrdiff_t>(cs_header_sz);
+    if (offset < 0)
+      offset += ::gsl::narrow<ptrdiff_t>(sz);
+    allocate_raw(::gsl::narrow<size_t>(offset));
   }
   void slab_allocator_t::_u_add_free(slab_allocator_object_t *v)
   {
@@ -101,10 +103,13 @@ namespace mcppalloc::slab_allocator::details
       return object->object_start(cs_alignment);
     }
   }
-  void *slab_allocator_t::_u_allocate_raw_at_end(size_t sz)
+  void *slab_allocator_t::_u_allocate_raw_at_end(ptrdiff_t sz)
   {
+    if (sz <= 0)
+      throw ::std::bad_alloc();
+    auto size = ::gsl::narrow<size_t>(sz);
     // get total needed size.
-    size_t total_size = slab_allocator_object_t::needed_size(sizeof(slab_allocator_object_t), sz, cs_alignment);
+    size_t total_size = slab_allocator_object_t::needed_size(sizeof(slab_allocator_object_t), size, cs_alignment);
     auto object = m_end;
     // tack on needed size to current end.
     auto new_end = reinterpret_cast<slab_allocator_object_t *>(reinterpret_cast<uint8_t *>(m_end) + total_size);
@@ -137,19 +142,19 @@ namespace mcppalloc::slab_allocator::details
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     // if empty, create at end.
     if (_u_empty()) {
-      return _u_allocate_raw_at_end(sz);
+      return _u_allocate_raw_at_end(::gsl::narrow<ptrdiff_t>(sz));
     }
     auto it = m_free_map.lower_bound(sz);
     if (it == m_free_map.end()) {
       if (m_free_map.size() == m_free_map.capacity())
-        return _u_allocate_raw_at_end(sz);
+        return _u_allocate_raw_at_end(::gsl::narrow<ptrdiff_t>(sz));
       else {
         if (m_free_map_needs_regeneration) {
           _u_generate_free_list();
           it = m_free_map.find(sz);
         }
         if (it == m_free_map.end())
-          return _u_allocate_raw_at_end(sz);
+          return _u_allocate_raw_at_end(::gsl::narrow<ptrdiff_t>(sz));
         else
           return _u_split_allocate(it->second, sz);
       }
