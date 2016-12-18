@@ -12,13 +12,18 @@ namespace mcppalloc
     }
     MCPPALLOC_ALWAYS_INLINE object_state_base_t *object_state_base_t::from_object_start(void *v, size_type alignment) noexcept
     {
-      return reinterpret_cast<object_state_base_t *>(reinterpret_cast<uint8_t *>(v) -
+      auto nv = reinterpret_cast<void *>(reinterpret_cast<uintptr_t>(v) & (~(alignment - 1)));
+      return reinterpret_cast<object_state_base_t *>(reinterpret_cast<uint8_t *>(nv) -
                                                      mcpputil::align(sizeof(object_state_base_t), alignment));
     }
     template <typename Object_State_Type>
     MCPPALLOC_ALWAYS_INLINE Object_State_Type *object_state_base_t::from_object_start(void *v, size_type alignment) noexcept
     {
-      return static_cast<Object_State_Type *>(from_object_start(v, alignment));
+      auto os = from_object_start(v, alignment);
+      if (mcpputil_unlikely(reinterpret_cast<uintptr_t>(os) % 16 != 0)) {
+        throw ::std::runtime_error("bad alignment");
+      }
+      return static_cast<Object_State_Type *>(os);
     }
 
     MCPPALLOC_ALWAYS_INLINE void
@@ -110,7 +115,11 @@ namespace mcppalloc
     }
     MCPPALLOC_ALWAYS_INLINE user_data_base_t *object_state_base_t::user_data() const noexcept
     {
-      return reinterpret_cast<user_data_base_t *>(m_user_data & (~static_cast<size_type>(7)));
+      auto tmp = m_user_data & (~static_cast<size_type>(7));
+      if ((tmp & 15) != 0) {
+        return nullptr;
+      }
+      return reinterpret_cast<user_data_base_t *>(tmp);
     }
     MCPPALLOC_ALWAYS_INLINE void object_state_base_t::set_user_data(void *user_data) noexcept
     {
