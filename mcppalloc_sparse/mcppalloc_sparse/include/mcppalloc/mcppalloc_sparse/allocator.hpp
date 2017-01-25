@@ -469,7 +469,7 @@ namespace mcppalloc::sparse
        **/
       using thread_allocator_unique_ptr_t =
           typename ::std::unique_ptr<this_thread_allocator_t,
-                                     typename mcpputil::cgc_allocator_deleter_t<this_thread_allocator_t, allocator>::type>;
+                                     typename mcpputil::mcpputil_allocator_deleter_t<this_thread_allocator_t, allocator>::type>;
       /**
        * \brief Type that is a map for thread allocators that uses the control allocator to handle memory.
        **/
