@@ -4,6 +4,7 @@
 #include <mcpputil/mcpputil/intrinsics.hpp>
 #include <mcpputil/mcpputil/unsafe_cast.hpp>
 #include <numeric>
+#include <immintrin.h>
 namespace mcppalloc::bitmap::details
 {
   template <size_t Quads>
@@ -86,9 +87,9 @@ namespace mcppalloc::bitmap::details
   MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::first_set() const noexcept -> size_t
   {
 #if defined(__AVX__) && !defined(__APPLE__)
-    __m256i m = *unsafe_cast<__m256i>(&m_array[0]);
+    __m256i m = *mcpputil::unsafe_cast<__m256i>(&m_array[0]);
     static_assert(size() >= 8, "");
-    __m256i m2 = *unsafe_cast<__m256i>(&m_array[4]);
+    __m256i m2 = *mcpputil::unsafe_cast<__m256i>(&m_array[4]);
     if (!_mm256_testz_si256(m, m)) {
       for (size_t i = 0; i < 4; ++i) {
         const uint64_t &it = m_array[i];
