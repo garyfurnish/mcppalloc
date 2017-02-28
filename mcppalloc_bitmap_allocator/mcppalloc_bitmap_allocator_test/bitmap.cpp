@@ -9,7 +9,7 @@ template <>
 ::std::vector<bitmap_allocator::thread_allocator_type *> bitmap_allocator::m_thread_allocator_by_manager_id{};
 
 using namespace bandit;
-
+using namespace ::snowhouse;
 using namespace ::mcpputil::literals;
 
 static void bitmap_state_test0()

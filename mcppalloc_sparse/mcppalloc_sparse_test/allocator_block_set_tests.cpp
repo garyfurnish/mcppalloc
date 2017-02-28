@@ -6,6 +6,7 @@
 #include <mcpputil/mcpputil/literals.hpp>
 
 using namespace ::bandit;
+using namespace ::snowhouse;
 using namespace ::mcpputil::literals;
 
 void allocator_block_set_tests()

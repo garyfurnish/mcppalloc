@@ -21,7 +21,7 @@ namespace mcppalloc
     {
       auto os = from_object_start(v, alignment);
       if (mcpputil_unlikely(reinterpret_cast<uintptr_t>(os) % 16 != 0)) {
-        throw ::std::runtime_error("bad alignment");
+        ::std::abort();
       }
       return static_cast<Object_State_Type *>(os);
     }

@@ -9,10 +9,10 @@ namespace mcppalloc
     class user_data_base_t;
   }
   /**
-     * \brief Default allocator policy.
-     *
-     * Does nothing on any event.
-     **/
+   * \brief Default allocator policy.
+   *
+   * Does nothing on any event.
+   **/
   struct default_allocator_thread_policy_t : public details::allocator_thread_policy_tag_t {
     mcpputil::do_nothing_t on_allocation;
     mcpputil::do_nothing_t on_create_allocator_block;

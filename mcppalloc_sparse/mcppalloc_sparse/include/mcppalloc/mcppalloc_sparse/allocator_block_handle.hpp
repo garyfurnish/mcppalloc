@@ -5,7 +5,7 @@ namespace mcppalloc::sparse::details
 {
   /**
    * \brief Structure used to store data about an allocation block in an allocator.
-  **/
+   **/
   template <typename Global_Allocator>
   struct allocator_block_handle_t {
     using global_allocator_t = Global_Allocator;
@@ -31,19 +31,19 @@ namespace mcppalloc::sparse::details
      * \brief Thread allocator that currently owns this handle.
      *
      * May be nullptr.
-    **/
+     **/
     typename global_allocator_t::this_thread_allocator_t *m_thread_allocator;
     /**
      * \brief Address of block for this handle.
      *
      * This does not own the block.
-    **/
+     **/
     allocator_block_type *m_block;
     /**
      * \brief Start location of block data.
      *
      * Since allocator_blocks may be temporarily inconsistent during a move operation, we cash their beginning location.
-    **/
+     **/
     uint8_t *m_begin;
   };
   template <typename charT, typename Traits, typename Global_Allocator>
