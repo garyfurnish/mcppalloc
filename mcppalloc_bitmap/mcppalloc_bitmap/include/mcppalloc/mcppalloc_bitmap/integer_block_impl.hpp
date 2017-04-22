@@ -1,10 +1,10 @@
 #pragma once
 #include "integer_block.hpp"
+#include <immintrin.h>
 #include <limits>
 #include <mcpputil/mcpputil/intrinsics.hpp>
 #include <mcpputil/mcpputil/unsafe_cast.hpp>
 #include <numeric>
-#include <immintrin.h>
 namespace mcppalloc::bitmap::details
 {
   template <size_t Quads>
