@@ -77,15 +77,15 @@ namespace mcppalloc::sparse::details
   protected:
     /**
      * \brief Next allocator pointer if whole block has not yet been used.
-    **/
+     **/
     ::mcppalloc::details::object_state_base_t *m_next_alloc_ptr;
     /**
      * \brief End of memory block.
-    **/
+     **/
     uint8_t *m_end;
     /**
      * \brief Minimum object allocation length.
-    **/
+     **/
     size_t m_minimum_alloc_length;
     /**
      * \brief Object state type size.
@@ -93,7 +93,7 @@ namespace mcppalloc::sparse::details
     size_t m_object_state_type_size;
     /**
      * \brief start of memory block.
-    **/
+     **/
     uint8_t *m_start;
   };
   template <typename Block_Policy>

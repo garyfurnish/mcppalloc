@@ -7,7 +7,8 @@
 #pragma optimize("", off)
 #endif
 
-using namespace bandit;
+using namespace ::bandit;
+using namespace ::snowhouse;
 extern void allocator_block_tests();
 extern void allocator_block_set_tests();
 extern void allocator_tests();

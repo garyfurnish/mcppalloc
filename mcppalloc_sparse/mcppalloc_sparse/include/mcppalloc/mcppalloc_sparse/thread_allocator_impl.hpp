@@ -298,7 +298,7 @@ namespace mcppalloc::sparse::details
       return false;
     }
     // gcreate and grab the empty block.
-    auto &inserted_block_ref = abs.add_block(::std::move(block), [this]() {}, [this]() {},
+    auto &inserted_block_ref = abs.add_block(::std::move(block), []() {}, []() {},
                                              [this](auto begin, auto end, auto offset) {
                                                MCPPALLOC_CONCURRENCY_LOCK_ASSUME(m_allocator._mutex());
                                                m_allocator._u_move_registered_blocks(begin, end, offset);

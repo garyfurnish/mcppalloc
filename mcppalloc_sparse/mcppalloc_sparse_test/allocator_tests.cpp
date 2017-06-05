@@ -6,6 +6,7 @@
 #include <mcpputil/mcpputil/literals.hpp>
 #include <mcpputil/mcpputil/memory_range.hpp>
 using namespace ::bandit;
+using namespace ::snowhouse;
 using namespace ::mcpputil::literals;
 void allocator_tests()
 {

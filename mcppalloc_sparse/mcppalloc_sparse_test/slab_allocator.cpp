@@ -4,7 +4,8 @@
 #include <mcpputil/mcpputil/bandit.hpp>
 #include <mcpputil/mcpputil/container.hpp>
 #include <mcpputil/mcpputil/unsafe_cast.hpp>
-using namespace bandit;
+using namespace ::bandit;
+using namespace ::snowhouse;
 using ::mcpputil::unsafe_cast;
 using ::mcpputil::align;
 void slab_allocator_bandit_tests()

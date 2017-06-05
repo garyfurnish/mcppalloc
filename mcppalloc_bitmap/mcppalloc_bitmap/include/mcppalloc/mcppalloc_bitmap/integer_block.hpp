@@ -73,11 +73,11 @@ namespace mcppalloc::bitmap::details
     integer_block_t operator^(const integer_block_t &) const noexcept;
     integer_block_t &operator^=(const integer_block_t &) noexcept;
     /**
-   * \brief Call function on all set bits.
-   *
-   * @param offset Offset to add to function when calling.
-   * @param func Function should take an index.
-   **/
+     * \brief Call function on all set bits.
+     *
+     * @param offset Offset to add to function when calling.
+     * @param func Function should take an index.
+     **/
     template <typename Func>
     void for_some_contiguous_bits_flip(size_t offset, Func &&func);
     /**

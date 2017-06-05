@@ -712,11 +712,12 @@ namespace mcppalloc::sparse::details
     minimum_alloc_length = object_state_type::needed_size(sizeof(object_state_type), minimum_alloc_length);
     maximum_alloc_length = object_state_type::needed_size(sizeof(object_state_type), maximum_alloc_length);
     // run find.
-    auto it = ::std::find_if(m_global_blocks.begin(), m_global_blocks.end(), [this, sz, minimum_alloc_length,
-                                                                              maximum_alloc_length](allocator_block_type &block) {
-      return block.minimum_allocation_length() == minimum_alloc_length &&
-             block.maximum_allocation_length() == maximum_alloc_length && block.max_alloc_available() >= sz;
-    });
+    auto it = ::std::find_if(m_global_blocks.begin(), m_global_blocks.end(),
+                             [sz, minimum_alloc_length, maximum_alloc_length](allocator_block_type &block) {
+                               return block.minimum_allocation_length() == minimum_alloc_length &&
+                                      block.maximum_allocation_length() == maximum_alloc_length &&
+                                      block.max_alloc_available() >= sz;
+                             });
     return it;
   }
   template <typename Allocator_Policy>
