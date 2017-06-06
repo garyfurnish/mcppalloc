@@ -22,7 +22,7 @@ namespace mcppalloc::slab_allocator::details
    * It is required that the lock not be held for reenterancy to be true.
    * It differs from allocator_t in that this allocator is completely in place.
    * This is both less memory and runtime efficient, but can be used to back the allocator_t.
-  **/
+   **/
   class slab_allocator_t
   {
   public:
@@ -164,7 +164,7 @@ namespace mcppalloc::slab_allocator::details
     free_map_type m_free_map;
     /**
      * \brief Array backing for free map.
-    **/
+     **/
     ::std::array<typename free_map_type::value_type, 1500> m_free_map_back;
   };
   constexpr inline size_t slab_allocator_t::alignment() noexcept

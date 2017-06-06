@@ -4,7 +4,9 @@
 #include <mcppalloc/mcppalloc_sparse/mcppalloc_sparse.hpp>
 #include <mcpputil/mcpputil/aligned_allocator.hpp>
 #include <mcpputil/mcpputil/bandit.hpp>
+using namespace ::snowhouse;
 using namespace bandit;
+using namespace snowhouse;
 template <>
 ::mcppalloc::details::user_data_base_t mcppalloc::sparse::details::allocator_block_t<
     mcppalloc::default_allocator_policy_t<::mcpputil::aligned_allocator_t<void, 8ul>>>::s_default_user_data{};

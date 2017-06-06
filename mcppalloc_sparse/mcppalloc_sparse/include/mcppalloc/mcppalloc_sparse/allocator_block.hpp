@@ -68,7 +68,7 @@ namespace mcppalloc
        * @param length Length of memory block that this allocator uses
        * @param minimum_alloc_length Minimum length of object that can be allocated using this allocator.
        * @param maximum_alloc_length Maximum length of object that can be allocated using this allocator.
-      **/
+       **/
       MCPPALLOC_ALWAYS_INLINE
       allocator_block_t(void *start, size_t length, size_t minimum_alloc_length, size_t maximum_alloc_length) noexcept;
       allocator_block_t(const allocator_block_t &) = delete;
@@ -80,14 +80,14 @@ namespace mcppalloc
        * \brief Allocate size bytes on the block.
        *
        * @return Valid pointer if possible, nullptr otherwise.
-      **/
+       **/
       auto allocate(size_t size) -> allocation_return_type;
       /**
        * \brief Destroy a v that is on the block.
        *
        * The usual cause of failure would be the pointer not being in the block.
        * @return True on success, false on failure.
-      **/
+       **/
       bool destroy(void *v);
       /**
        * \brief Destroy a v that is on the block.
@@ -97,16 +97,16 @@ namespace mcppalloc
        * @param last_collapsed_size Max size of allocation made available by destroying.
        * @param last_max_alloc_available Return the previous last max alloc available.
        * @return True on success, false on failure.
-      **/
+       **/
       bool destroy(void *v, size_t &last_collapsed_size, size_t &last_max_alloc_available);
       /**
        * \brief Collect any adjacent blocks that may have formed into one block.
        * @param num_quasifreed Increment by number of quasifreed found.
-      **/
+       **/
       void collect(size_t &num_quasifreed);
       /**
        * \brief Return the maximum allocation size available.
-      **/
+       **/
       size_t max_alloc_available();
       /**
        * \brief Verify object state os.
@@ -125,11 +125,11 @@ namespace mcppalloc
       bool full() const noexcept;
       /**
        * \brief Return minimum object allocation length.
-      **/
+       **/
       size_t minimum_allocation_length() const;
       /**
        * \brief Return maximum object allocation length.
-      **/
+       **/
       size_t maximum_allocation_length() const;
       /**
        * \brief Return updated last max alloc available.

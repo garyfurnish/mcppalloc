@@ -1,5 +1,6 @@
 #pragma once
 #include "integer_block.hpp"
+#include <immintrin.h>
 #include <limits>
 #include <mcpputil/mcpputil/intrinsics.hpp>
 #include <mcpputil/mcpputil/unsafe_cast.hpp>
@@ -86,9 +87,9 @@ namespace mcppalloc::bitmap::details
   MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::first_set() const noexcept -> size_t
   {
 #if defined(__AVX__) && !defined(__APPLE__)
-    __m256i m = *unsafe_cast<__m256i>(&m_array[0]);
+    __m256i m = *mcpputil::unsafe_cast<__m256i>(&m_array[0]);
     static_assert(size() >= 8, "");
-    __m256i m2 = *unsafe_cast<__m256i>(&m_array[4]);
+    __m256i m2 = *mcpputil::unsafe_cast<__m256i>(&m_array[4]);
     if (!_mm256_testz_si256(m, m)) {
       for (size_t i = 0; i < 4; ++i) {
         const uint64_t &it = m_array[i];
@@ -222,7 +223,7 @@ namespace mcppalloc::bitmap::details
 #if defined(__AVX2__) && !defined(__APPLE__)
     const __m256i ones = _mm256_set1_epi64x(-1);
     for (size_t i = 0; i + 3 < size(); i += 4) {
-      __m256i m = *unsafe_cast<__m256i>(&m_array[i]);
+      __m256i m = *mcpputil::unsafe_cast<__m256i>(&m_array[i]);
       m = _mm256_andnot_si256(m, ones);
       if (_mm256_testz_si256(m, m)) {
         func(offset + i * 64, offset + ((i + 4) * 64));
@@ -230,7 +231,7 @@ namespace mcppalloc::bitmap::details
     }
 #elif defined(__SSE4__)
     for (size_t i = 0; i + 1 < size(); i += 2) {
-      __m128i *m = unsafe_cast<__m128i>(&m_array[i]);
+      __m128i *m = mcpputil::unsafe_cast<__m128i>(&m_array[i]);
       if (_mm_test_all_ones(*m)) {
         func(offset + i * 64, offset + ((i + 2) * 64));
       }

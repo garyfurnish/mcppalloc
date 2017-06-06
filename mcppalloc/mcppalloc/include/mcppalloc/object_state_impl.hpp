@@ -21,7 +21,7 @@ namespace mcppalloc
     {
       auto os = from_object_start(v, alignment);
       if (mcpputil_unlikely(reinterpret_cast<uintptr_t>(os) % 16 != 0)) {
-        throw ::std::runtime_error("bad alignment");
+        ::std::abort();
       }
       return static_cast<Object_State_Type *>(os);
     }
@@ -47,8 +47,8 @@ namespace mcppalloc
 
     MCPPALLOC_ALWAYS_INLINE void object_state_base_t::set_in_use(bool v) noexcept
     {
-      size_type ptr = static_cast<size_type>(m_next);
-      size_type iv = static_cast<size_type>(v);
+      auto ptr = static_cast<size_type>(m_next);
+      auto iv = static_cast<size_type>(v);
       m_next = (ptr & mcpputil::bitwise_negate(1)) | (iv & 1);
     }
     MCPPALLOC_ALWAYS_INLINE bool object_state_base_t::not_available() const noexcept
@@ -74,7 +74,7 @@ namespace mcppalloc
     }
     MCPPALLOC_ALWAYS_INLINE void object_state_base_t::set_next_valid(bool v) noexcept
     {
-      size_type ptr = static_cast<size_type>(m_next);
+      auto ptr = static_cast<size_type>(m_next);
       size_type iv = static_cast<size_type>(v) << 1;
       m_next = (ptr & mcpputil::bitwise_negate(2)) | (iv & 2);
     }
@@ -94,7 +94,7 @@ namespace mcppalloc
 
     MCPPALLOC_ALWAYS_INLINE void object_state_base_t::set_next(object_state_base_t *state) noexcept
     {
-      size_type ptr = reinterpret_cast<size_type>(state);
+      auto ptr = reinterpret_cast<size_type>(state);
       //      size_type iv = static_cast<size_type>(not_available());
       m_next = (ptr & static_cast<size_type>(-4)) | (m_next & 1); //(iv & 1);
     }
