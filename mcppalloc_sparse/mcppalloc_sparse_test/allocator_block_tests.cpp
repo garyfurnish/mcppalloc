@@ -4,6 +4,7 @@
 #include <mcppalloc/mcppalloc_sparse/mcppalloc_sparse.hpp>
 #include <mcpputil/mcpputil/aligned_allocator.hpp>
 #include <mcpputil/mcpputil/bandit.hpp>
+using namespace ::snowhouse;
 using namespace bandit;
 using namespace snowhouse;
 template <>

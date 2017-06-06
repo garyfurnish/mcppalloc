@@ -1,3 +1,4 @@
+
 #pragma once
 #include "functor.hpp"
 #include <mcpputil/mcpputil/boost/property_tree/json_parser.hpp>

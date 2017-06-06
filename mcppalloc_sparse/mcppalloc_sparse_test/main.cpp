@@ -6,9 +6,8 @@
 #ifdef _WIN32
 #pragma optimize("", off)
 #endif
-
-using namespace ::bandit;
 using namespace ::snowhouse;
+using namespace bandit;
 extern void allocator_block_tests();
 extern void allocator_block_set_tests();
 extern void allocator_tests();

@@ -99,7 +99,7 @@ namespace mcppalloc::bitmap_allocator
        **/
       using thread_allocator_unique_ptr_type = typename ::std::unique_ptr<
           thread_allocator_type,
-          typename mcpputil::cgc_allocator_deleter_t<thread_allocator_type, internal_allocator_type>::type>;
+          typename mcpputil::mcpputil_allocator_deleter_t<thread_allocator_type, internal_allocator_type>::type>;
       /**
        * \brief Mutex for allocator.
        **/
