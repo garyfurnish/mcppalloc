@@ -2,7 +2,7 @@
 #include "allocator_block_set.hpp"
 #include "sparse_allocator_block_set_verifier.hpp"
 #include <cassert>
-#include <iostream>
+
 #include <mcpputil/mcpputil/boost/property_tree/ptree.hpp>
 #include <mcpputil/mcpputil/pointer_utils.hpp>
 #include <mcpputil/mcpputil/vector_utils.hpp>

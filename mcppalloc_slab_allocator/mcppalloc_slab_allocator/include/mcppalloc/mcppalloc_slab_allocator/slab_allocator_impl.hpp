@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+
 #include <mcpputil/mcpputil/unsafe_cast.hpp>
 #include <stdexcept>
 namespace mcppalloc::slab_allocator::details

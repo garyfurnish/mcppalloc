@@ -1,6 +1,6 @@
 #pragma once
 #include <atomic>
-#include <iostream>
+
 #include <mcppalloc/mcppalloc_slab_allocator/slab_allocator.hpp>
 #include <mcpputil/mcpputil/intrinsics.hpp>
 #include <mcpputil/mcpputil/security.hpp>

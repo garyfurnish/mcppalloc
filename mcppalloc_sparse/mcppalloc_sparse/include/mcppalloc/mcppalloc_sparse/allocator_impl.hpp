@@ -5,7 +5,7 @@
 #endif
 #include "functor.hpp"
 #include "sparse_allocator_verifier.hpp"
-#include <iostream>
+
 #include <mcpputil/mcpputil/container_functions.hpp>
 namespace mcppalloc::sparse::details
 {
