@@ -22,12 +22,14 @@ namespace mcppalloc::bitmap_allocator
       using internal_allocator_type = typename allocator_policy_type::internal_allocator_type;
       using slab_allocator_type = ::mcppalloc::slab_allocator::details::slab_allocator_t;
 
-      bitmap_allocator_t(size_t size, size_t size_hint);
+      bitmap_allocator_t();
       bitmap_allocator_t(const bitmap_allocator_t &) = delete;
       bitmap_allocator_t(bitmap_allocator_t &&) noexcept = delete;
       bitmap_allocator_t &operator=(const bitmap_allocator_t &) = delete;
       bitmap_allocator_t &operator=(bitmap_allocator_t &&) noexcept = delete;
       ~bitmap_allocator_t();
+
+      void initialize(size_t size, size_t size_hint);
 
       REQUIRES(!m_mutex) void shutdown();
 
@@ -150,6 +152,10 @@ namespace mcppalloc::bitmap_allocator
                                    ::std::less<::std::thread::id>,
                                    thread_allocators_allocator_type>
           m_thread_allocators;
+      /**
+       * \brief Has allocator been initialized.
+       **/
+      bool m_initialized{false};
     };
   }
   template <typename Allocator_Policy>

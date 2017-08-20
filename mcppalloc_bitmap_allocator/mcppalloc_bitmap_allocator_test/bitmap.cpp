@@ -19,7 +19,8 @@ static void bitmap_state_test0()
   using ::mcppalloc::bitmap_allocator::details::c_bitmap_block_size;
   using allocator_type =
       ::mcppalloc::bitmap_allocator::bitmap_allocator_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>;
-  allocator_type bitmap_allocator(2000000, 2000000);
+  allocator_type bitmap_allocator{};
+  bitmap_allocator.initialize(2000000, 2000000);
   auto &fast_slab = bitmap_allocator.underlying_memory();
   fast_slab.align_next(c_bitmap_block_size);
   constexpr const size_t packed_size = c_bitmap_block_size - 2048;
@@ -142,7 +143,8 @@ static void multiple_slab_test0()
 {
   using allocator_type =
       ::mcppalloc::bitmap_allocator::bitmap_allocator_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>;
-  allocator_type bitmap_allocator(2000000, 2000000);
+  allocator_type bitmap_allocator{};
+  bitmap_allocator.initialize(2000000, 2000000);
   auto &fast_slab = bitmap_allocator.underlying_memory();
   constexpr const size_t packed_size = 4096 * 16;
   uint8_t *ret = reinterpret_cast<uint8_t *>(fast_slab.allocate_raw(packed_size));
@@ -170,7 +172,8 @@ static void multiple_slab_test0b()
 {
   using allocator_type =
       ::mcppalloc::bitmap_allocator::bitmap_allocator_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>;
-  allocator_type bitmap_allocator(2000000, 2000000);
+  allocator_type bitmap_allocator{};
+  bitmap_allocator.initialize(2000000, 2000000);
   auto &fast_slab = bitmap_allocator.underlying_memory();
   constexpr const size_t packed_size = 4096 * 32;
   uint8_t *ret = reinterpret_cast<uint8_t *>(fast_slab.allocate_raw(packed_size));
@@ -199,8 +202,8 @@ static void multiple_slab_test1()
 {
   using allocator_type =
       ::mcppalloc::bitmap_allocator::bitmap_allocator_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>;
-  allocator_type bitmap_allocator(2000000, 2000000);
-  // TODO: Commensting this out yields a crash
+  allocator_type bitmap_allocator{};
+  bitmap_allocator.initialize(2000000, 2000000); // TODO: Commensting this out yields a crash
   bitmap_allocator.add_type(::mcppalloc::bitmap_allocator::details::bitmap_type_info_t(0, 0));
   allocator_type::package_type package1(0);
   allocator_type::package_type package2(0);
@@ -254,7 +257,8 @@ void exhaustive_test()
 {
   using allocator_type =
       ::mcppalloc::bitmap_allocator::bitmap_allocator_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>;
-  allocator_type bitmap_allocator(20000000, 20000000);
+  allocator_type bitmap_allocator{};
+  bitmap_allocator.initialize(2000000, 2000000);
   bitmap_allocator.add_type(::mcppalloc::bitmap_allocator::details::bitmap_type_info_t(0, 0));
   auto &poa = bitmap_allocator;
 

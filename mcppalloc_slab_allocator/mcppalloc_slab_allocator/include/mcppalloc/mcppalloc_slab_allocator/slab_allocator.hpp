@@ -41,14 +41,18 @@ namespace mcppalloc::slab_allocator::details
     static_assert(cs_header_sz == 64, "");
     /**
      * \brief Constructor.
+     **/
+    slab_allocator_t();
+    slab_allocator_t(const slab_allocator_t &) = delete;
+    slab_allocator_t(slab_allocator_t &&) = delete;
+    ~slab_allocator_t();
+    /**
+     * \brief Constructor.
      *
      * @param size Minimum size.
      * @param size_hint Suggested expand size.
      **/
-    slab_allocator_t(size_t size, size_t size_hint);
-    slab_allocator_t(const slab_allocator_t &) = delete;
-    slab_allocator_t(slab_allocator_t &&) = delete;
-    ~slab_allocator_t();
+    void initialize(size_t size, size_t size_hint);
     void _verify() REQUIRES(!m_mutex);
     /**
      * \brief Align the next allocation to the given size.
@@ -153,6 +157,10 @@ namespace mcppalloc::slab_allocator::details
      * \brief Current position of end object state (invalid).
      **/
     slab_allocator_object_t *m_end;
+    /**
+     * \brief True if initialized, false otherwise.
+     **/
+    bool m_initialized{false};
     /**
      * \brief True if free map overflowed and dumped free positions on the floor.
      **/

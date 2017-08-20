@@ -13,7 +13,8 @@ void slab_allocator_bandit_tests()
   describe("Slab Allocator", []() {
     it("sa_test1", []() {
       using ::mcppalloc::slab_allocator::details::slab_allocator_object_t;
-      ::mcppalloc::slab_allocator::details::slab_allocator_t slab(500000, 5000000);
+      ::mcppalloc::slab_allocator::details::slab_allocator_t slab;
+      slab.initialize(500000, 5000000);
       using slab_type = decltype(slab);
       uint8_t *alloc1 = reinterpret_cast<uint8_t *>(slab.allocate_raw(100));
       AssertThat(alloc1 == slab.begin() + slab_type::cs_header_sz, IsTrue());

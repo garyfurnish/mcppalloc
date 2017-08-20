@@ -4,18 +4,25 @@
 #include <stdexcept>
 namespace mcppalloc::slab_allocator::details
 {
-  slab_allocator_t::slab_allocator_t(size_t size, size_t size_hint)
+  slab_allocator_t::slab_allocator_t()
 
   {
+  }
+  slab_allocator_t::~slab_allocator_t()
+  {
+    _verify();
+  }
+  void slab_allocator_t::initialize(size_t size, size_t size_hint)
+  {
+    if (mcpputil_unlikely(m_initialized)) {
+      throw(::std::runtime_error("slab already initialized fcdc0b8d-484c-4348-b6c7-d3467dc89e3d"));
+    }
     m_free_map = free_map_type(m_free_map_back.data(), sizeof(m_free_map_back));
     if (!m_slab.allocate(size, mcpputil::slab_t::find_hole(size_hint)))
       throw ::std::runtime_error("Unable to allocate slab");
     m_end = reinterpret_cast<slab_allocator_object_t *>(m_slab.begin());
     m_end->set_all(reinterpret_cast<slab_allocator_object_t *>(m_slab.end()), false, false);
-  }
-  slab_allocator_t::~slab_allocator_t()
-  {
-    _verify();
+    m_initialized = true;
   }
   void slab_allocator_t::_verify()
   {
@@ -105,8 +112,9 @@ namespace mcppalloc::slab_allocator::details
   }
   void *slab_allocator_t::_u_allocate_raw_at_end(ptrdiff_t sz)
   {
-    if (sz <= 0)
+    if (sz <= 0) {
       throw ::std::bad_alloc();
+    }
     auto size = ::gsl::narrow<size_t>(sz);
     // get total needed size.
     size_t total_size = slab_allocator_object_t::needed_size(sizeof(slab_allocator_object_t), size, cs_alignment);
@@ -138,6 +146,9 @@ namespace mcppalloc::slab_allocator::details
   }
   void *slab_allocator_t::allocate_raw(size_t sz)
   {
+    if (mcpputil_unlikely(!m_initialized)) {
+      throw ::std::runtime_error("Slab not initialized 514c36ff-6a23-4ebe-904d-9907c7afc05f");
+    }
     sz = mcpputil::align(sz, cs_alignment);
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     // if empty, create at end.
@@ -164,6 +175,9 @@ namespace mcppalloc::slab_allocator::details
   }
   void slab_allocator_t::deallocate_raw(void *v)
   {
+    if (mcpputil_unlikely(!m_initialized)) {
+      throw ::std::runtime_error("Slab not initialized f6d8d892-1c0a-4486-890a-1341589da295");
+    }
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     auto object = slab_allocator_object_t::from_object_start(v, cs_alignment);
     object->verify_magic();
