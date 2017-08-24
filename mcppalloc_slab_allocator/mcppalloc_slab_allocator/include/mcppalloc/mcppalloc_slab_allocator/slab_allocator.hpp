@@ -23,7 +23,7 @@ namespace mcppalloc::slab_allocator::details
    * It differs from allocator_t in that this allocator is completely in place.
    * This is both less memory and runtime efficient, but can be used to back the allocator_t.
    **/
-  class slab_allocator_t
+  class MCPPALLOC_SLAB_ALLOCATOR_DLL_PUBLIC slab_allocator_t
   {
   public:
     /**
