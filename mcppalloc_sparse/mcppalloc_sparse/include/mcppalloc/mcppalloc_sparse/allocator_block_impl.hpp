@@ -6,6 +6,7 @@
 #include <mcpputil/mcpputil/boost/property_tree/ptree.hpp>
 #include <mcpputil/mcpputil/function_iterator.hpp>
 #include <mcpputil/mcpputil/intrinsics.hpp>
+#include <mcpputil/mcpputil/unsafe_cast.hpp>
 namespace mcppalloc::sparse::details
 {
 #ifdef _WIN32
@@ -71,8 +72,8 @@ namespace mcppalloc::sparse::details
         assert(state->object_size() < static_cast<size_t>(end() - begin()));
         assert(state->next());
       }
-      auto begin = mcpputil::make_next_iterator(reinterpret_cast<object_state_type *>(this->begin()));
-      auto end = mcpputil::make_next_iterator(current_end());
+      auto begin = mcpputil::make_next_iterator(mcpputil::unsafe_cast<mcppalloc::details::object_state_base_t>(this->begin()));
+      auto end = mcpputil::make_next_iterator(mcpputil::unsafe_cast<mcppalloc::details::object_state_base_t>(current_end()));
       assert(begin.m_t <= end.m_t);
       for (auto os_it = begin; os_it != end; ++os_it) {
         assert(os_it->next_valid() || os_it->next() == end);

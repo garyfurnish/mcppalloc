@@ -9,18 +9,19 @@ namespace mcppalloc::sparse::details
   class sparse_allocator_block_set_verifier_t
   {
   public:
+#include <mcpputil/mcpputil/disable_unreachable_code_warning.hpp>
     template <typename Allocator_Block_Set>
     static void verify_magic_numbers(Allocator_Block_Set &abs)
     {
       if constexpr (debug_level == 0) {
         return;
       }
-
       if (mcpputil_unlikely(abs.m_magic_prefix != Allocator_Block_Set::cs_magic_prefix)) {
         ::std::cerr << "ABS MEMORY CORRUPTION 965b54ab-0eef-4878-8a0b-d4a4c5e62a0f\n";
         ::std::abort();
       }
     }
+#include <mcpputil/mcpputil/disable_unreachable_code_warning.hpp>
     template <typename Allocator_Block_Set>
     static void verify_available_blocks(Allocator_Block_Set &abs)
     {

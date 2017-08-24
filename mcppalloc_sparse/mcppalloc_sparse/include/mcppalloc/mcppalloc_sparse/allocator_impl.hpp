@@ -1,6 +1,6 @@
 
 #pragma once
-#if defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL != 0
+#if defined(MCPPUTIL_DISABLE_ITERATOR_DEBUG) && defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL != 0
 #error "IDL must be zero"
 #endif
 #include "functor.hpp"
