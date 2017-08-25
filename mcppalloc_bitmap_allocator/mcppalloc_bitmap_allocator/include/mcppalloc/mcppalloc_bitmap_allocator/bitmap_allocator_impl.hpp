@@ -17,7 +17,7 @@ namespace mcppalloc::bitmap_allocator::details
   void bitmap_allocator_t<Allocator_Policy>::initialize(size_t size, size_t size_hint)
   {
     m_slab.initialize(size, size_hint);
-    m_thread_allocator_by_manager_id.resize(gsl::narrow<size_t>(mcpputil::thread_id_manager_t::gs().max_threads()));
+    m_thread_allocator_by_manager_id.resize(gsl::narrow<size_t>(mcpputil::get_thread_id_manager().max_threads()));
     for (auto &&ptr : m_thread_allocator_by_manager_id) {
       ptr = nullptr;
     }
@@ -49,14 +49,14 @@ namespace mcppalloc::bitmap_allocator::details
   template <typename Allocator_Policy>
   auto bitmap_allocator_t<Allocator_Policy>::get_ttla() noexcept -> thread_allocator_type *
   {
-    const auto id = mcpputil::thread_id_manager_t::gs().current_thread_id();
+    const auto id = mcpputil::get_thread_id_manager().current_thread_id();
     assert(static_cast<size_t>(id) <= m_thread_allocator_by_manager_id.size());
     return m_thread_allocator_by_manager_id[::gsl::narrow_cast<size_t>(id)];
   }
   template <typename Allocator_Policy>
   void bitmap_allocator_t<Allocator_Policy>::set_ttla(thread_allocator_type *ta) noexcept
   {
-    m_thread_allocator_by_manager_id[::gsl::narrow<size_t>(mcpputil::thread_id_manager_t::gs().current_thread_id())] = ta;
+    m_thread_allocator_by_manager_id[::gsl::narrow<size_t>(mcpputil::get_thread_id_manager().current_thread_id())] = ta;
   }
   template <typename Allocator_Policy>
   auto bitmap_allocator_t<Allocator_Policy>::_get_memory() -> bitmap_state_t *
@@ -87,7 +87,7 @@ namespace mcppalloc::bitmap_allocator::details
       throw ::std::runtime_error("bitmap allocator not initialized b6311ece-28bb-4d73-92ab-ebcd9af16c85");
     }
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
-    const auto id = mcpputil::thread_id_manager_t::gs().current_thread_id();
+    const auto id = mcpputil::get_thread_id_manager().current_thread_id();
     if (static_cast<size_t>(id) >= m_thread_allocator_by_manager_id.size()) {
       throw ::std::runtime_error("bitmap_allocator initializing invalid thread id. c0356395-8355-4c6f-9336-316111e7b1e4");
     }

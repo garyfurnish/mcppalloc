@@ -308,7 +308,7 @@ void bitmap_allocator_tests()
   manager->set_max_threads(10);
   manager->set_max_tls_pointers(10);
   manager.release();
-  mcpputil::thread_id_manager_t::gs().add_current_thread();
+  mcpputil::get_thread_id_manager().add_current_thread();
   describe("bitmap_tests", []() {
     it("bitmap_state_test0", []() { bitmap_state_test0(); });
     it("multiple_slab_test0", []() { multiple_slab_test0(); });
