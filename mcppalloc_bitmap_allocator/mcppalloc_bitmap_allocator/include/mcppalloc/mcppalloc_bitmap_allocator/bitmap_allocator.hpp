@@ -22,6 +22,8 @@ namespace mcppalloc::bitmap_allocator
       using internal_allocator_type = typename allocator_policy_type::internal_allocator_type;
       using slab_allocator_type = ::mcppalloc::slab_allocator::details::slab_allocator_t;
 
+	  using _static_vec_type = ::std::vector<thread_allocator_type *>;
+
       bitmap_allocator_t();
       bitmap_allocator_t(const bitmap_allocator_t &) = delete;
       bitmap_allocator_t(bitmap_allocator_t &&) noexcept = delete;
@@ -142,8 +144,7 @@ namespace mcppalloc::bitmap_allocator
       using thread_allocators_allocator_type =
           typename internal_allocator_traits::template rebind_alloc<thread_allocators_pair_type>;
 
-      using static_vec_type = ::std::vector<thread_allocator_type *>;
-      static static_vec_type m_thread_allocator_by_manager_id;
+      static _static_vec_type m_thread_allocator_by_manager_id;
       /**
        * \brief Thread allocators.
        **/
