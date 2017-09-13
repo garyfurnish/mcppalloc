@@ -93,10 +93,9 @@ void allocator_tests()
     });
     it("test4", []() {
       /*for (size_t j = 0; j < 30; ++j) {
-      ::std::array<mcppalloc::rebind_vector_t<size_t, mcppalloc::cgc_internal_allocator_t<size_t>>, 5> vecs;
-      for (size_t i = 0; i < 10000; ++i) {
-        for (auto &vec : vecs)
-          vec.push_back(i);
+      ::std::array<mcppalloc::rebind_vector_t<size_t,
+      mcppalloc::cgc_internal_allocator_t<size_t>>, 5> vecs; for (size_t i = 0;
+      i < 10000; ++i) { for (auto &vec : vecs) vec.push_back(i);
       }
       for (size_t i = 0; i < 10000; ++i) {
         for (auto &vec : vecs)
@@ -110,7 +109,8 @@ void allocator_tests()
       AssertThat(allocator->initialize(100000, 100000000), IsTrue());
       // get thread local state.
       auto &tls = allocator->initialize_thread();
-      // ok, for this as soon as possible we want to get rid of the extra blocks from abs.
+      // ok, for this as soon as possible we want to get rid of the extra blocks
+      // from abs.
       tls.set_destroy_threshold(0);
       tls.set_minimum_local_blocks(0);
       // so we need to get the abs.
@@ -131,7 +131,8 @@ void allocator_tests()
       }
       AssertThat(abs.m_blocks.size(), Equals(1_sz));
       {
-        // the one block that is left should have the same address in registration as in the block set.
+        // the one block that is left should have the same address in
+        // registration as in the block set.
         MCPPALLOC_CONCURRENCY_LOCK_GUARD(allocator->_mutex());
         assert(allocator->_u_blocks().size() == 1);
         AssertThat(allocator->_u_blocks(), HasLength(1));

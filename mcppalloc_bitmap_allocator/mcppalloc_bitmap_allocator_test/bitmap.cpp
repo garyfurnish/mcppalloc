@@ -237,7 +237,8 @@ static void multiple_slab_test1()
   AssertThat(poa.num_free_blocks(), Equals(1_sz));
   for (size_t i = 0; i < allocator_type::package_type::cs_num_vectors; ++i)
     AssertThat(poa.num_globals(i, 0), Equals(0_sz));
-  // ok, now take and check that destroying with a valid block puts it in globals not freed.
+  // ok, now take and check that destroying with a valid block puts it in
+  // globals not freed.
   auto &ta2 = poa.initialize_thread();
   {
     void *v = ta2.allocate(128).m_ptr;
@@ -275,11 +276,13 @@ void exhaustive_test()
       mcpputil::secure_zero(v, allocation.m_size);
       const auto state = ::mcppalloc::bitmap_allocator::details::get_state(v);
       if (mcpputil_unlikely(state == v)) {
-        ::std::cerr << "Consistency error in bitmap exhaustive_test 5c9af962-57e6-4bf1-a843-12a239343c27\n";
+        ::std::cerr << "Consistency error in bitmap exhaustive_test "
+                       "5c9af962-57e6-4bf1-a843-12a239343c27\n";
         ::std::abort();
       }
       if (mcpputil_unlikely(v_end > state->end())) {
-        ::std::cerr << "Consistency error in bitmap exhaustive_test 7caa9401-26f1-4cdc-9849-837b2767fa1e\n";
+        ::std::cerr << "Consistency error in bitmap exhaustive_test "
+                       "7caa9401-26f1-4cdc-9849-837b2767fa1e\n";
         ::std::abort();
       }
       if (!ptrs.empty()) {
@@ -288,7 +291,8 @@ void exhaustive_test()
         void *const prev_state = ::mcppalloc::bitmap_allocator::details::get_state(prev);
         if (state != prev_state && mcpputil_unlikely(prev_end >= state)) {
           ::std::cerr << prev << " " << state << " " << prev_end << "\n";
-          ::std::cerr << "Consistency error in bitmap_exhaustive_test ad5058b9-85b0-461e-8c91-aca93faf4beb\n";
+          ::std::cerr << "Consistency error in bitmap_exhaustive_test "
+                         "ad5058b9-85b0-461e-8c91-aca93faf4beb\n";
           ::std::abort();
         }
       }

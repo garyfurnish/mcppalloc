@@ -75,13 +75,16 @@ namespace mcppalloc::slab_allocator::details
     for (auto it = _u_object_begin(); it != _u_object_current_end(); ++it) {
       it->verify_magic();
       if (mcpputil_unlikely(&*it >= _u_object_end())) {
-        ::std::cerr << "mcppalloc slab allocator consistency error a35664e3-21f9-4ea7-a921-844b8a2dc598" << ::std::endl;
+        ::std::cerr << "mcppalloc slab allocator consistency error "
+                       "a35664e3-21f9-4ea7-a921-844b8a2dc598"
+                    << ::std::endl;
         ::std::terminate();
       }
       // if in use, go to next.
       if (it->not_available())
         continue;
-      // if next valid, and both this and next object state are not in use, coalesce.
+      // if next valid, and both this and next object state are not in use,
+      // coalesce.
       while (it->next_valid() && !it->next()->not_available()) {
         if (!it->next()->next_valid())
           break;
@@ -214,4 +217,4 @@ namespace mcppalloc::slab_allocator::details
     ptree.put("size", ::std::to_string(m_slab.size()));
     ptree.put("current_size", ::std::to_string(current_size()));
   }
-}
+} // namespace mcppalloc::slab_allocator::details

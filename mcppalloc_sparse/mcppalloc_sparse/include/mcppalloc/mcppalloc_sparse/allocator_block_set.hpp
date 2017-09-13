@@ -8,7 +8,8 @@
 namespace mcppalloc::sparse::details
 {
   /**
-   * \brief This is a set of allocator blocks with the same minimum and maximum allocation size.
+   * \brief This is a set of allocator blocks with the same minimum and maximum
+   *allocation size.
    *
    * This stores lists of allocator blocks for various sizes of allocations.
    **/
@@ -65,7 +66,8 @@ namespace mcppalloc::sparse::details
     /**
      * \brief Regenerate available blocks in case it is stale.
      *
-     * Also should be called if m_blocks may have changed locations because of allocation.
+     * Also should be called if m_blocks may have changed locations because of
+     *allocation.
      **/
     void regenerate_available_blocks();
     /**
@@ -73,7 +75,8 @@ namespace mcppalloc::sparse::details
      **/
     void collect();
     /**
-     * \brief Allocate memory of given size, return nullptr if not possible in existing blocks.
+     * \brief Allocate memory of given size, return nullptr if not possible in
+     *existing blocks.
      *
      * @param sz Size to allocate.
      * @return A pointer to allocated memory, nullptr on failure.
@@ -81,7 +84,8 @@ namespace mcppalloc::sparse::details
     auto allocate(size_t sz) -> allocation_return_type;
     /**
      * \brief Destroy memory.
-     * @return True if this block set allocated the memory and thus destroyed it, false otherwise.
+     * @return True if this block set allocated the memory and thus destroyed it,
+     *false otherwise.
      **/
     bool destroy(void *v);
 
@@ -105,8 +109,8 @@ namespace mcppalloc::sparse::details
     /**
      * \brief Remove a block from the set.
      *
-     * The functional on_move is a functional of the form (begin,end,offset) that is called on blocks that are moved.
-     * param it Position to remove.
+     * The functional on_move is a functional of the form (begin,end,offset) that
+     *is called on blocks that are moved. param it Position to remove.
      * @param lock_func Functional with no args called before modifing blocks.
      * @param unlock_func Functional with no args called after modifying blocks.
      * @param move_func Functional to call on moved blocks.
@@ -117,7 +121,8 @@ namespace mcppalloc::sparse::details
                       Unlock_Functional &&unlock_func,
                       Move_Functional &&move_func);
     /**
-     * \brief Return true if add_block would cause the container of blocks to move in memory, false otherwise.
+     * \brief Return true if add_block would cause the container of blocks to move
+     *in memory, false otherwise.
      **/
     bool add_block_is_safe() const;
     /**
@@ -136,10 +141,13 @@ namespace mcppalloc::sparse::details
      **/
     auto last_block() const noexcept -> const allocator_block_type *;
     /**
-     * \brief Push all empty block memory ranges onto container t and then remove th
+     * \brief Push all empty block memory ranges onto container t and then remove
+     *th
      *
-     * The on_move is a functional of the form (begin,end,offset) that is called on blocks that are moved.
-     * @param l Function to call on removed blocks (called multiple times with r val block ref).
+     * The on_move is a functional of the form (begin,end,offset) that is called
+     *on blocks that are moved.
+     * @param l Function to call on removed blocks (called multiple times with r
+     *val block ref).
      * @param lock_func Functional with no args called before modifing blocks.
      * @param unlock_func Functional with no args called after modifying blocks.
      * @param move_func Functional to call on moved blocks.
@@ -153,7 +161,8 @@ namespace mcppalloc::sparse::details
                            size_t min_to_leave = 0);
 
     /**
-     * \brief Return the number of memory addresses destroyed since last free empty blocks operation.
+     * \brief Return the number of memory addresses destroyed since last free
+     *empty blocks operation.
      **/
     auto num_destroyed_since_last_free() const noexcept -> size_t;
     /**
@@ -200,8 +209,8 @@ namespace mcppalloc::sparse::details
      *
      * This is sorted by allocation size available.
      * It does not contain a pointer to the last block.
-     * So if last block keeps getting hit, it is not necessary to recalculate memory free.
-     * First part of an element is memory available in that block.
+     * So if last block keeps getting hit, it is not necessary to recalculate
+     *memory free. First part of an element is memory available in that block.
      * Second part is a pointer to the block.
      **/
     allocator_block_flat_set_t m_available_blocks;
@@ -222,9 +231,10 @@ namespace mcppalloc::sparse::details
      **/
     size_t m_allocator_max_size = 0;
     /*
-     * \brief Number of memory addresses destroyed since last free empty blocks operation.
+     * \brief Number of memory addresses destroyed since last free empty blocks
+     *operation.
      **/
     size_t m_num_destroyed_since_free = 0;
   };
-}
+} // namespace mcppalloc::sparse::details
 #include "allocator_block_set_impl.hpp"

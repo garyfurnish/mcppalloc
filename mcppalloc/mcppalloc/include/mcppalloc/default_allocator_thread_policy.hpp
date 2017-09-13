@@ -24,4 +24,4 @@ namespace mcppalloc
     }
     using allocator_block_user_data_type = details::user_data_base_t;
   };
-}
+} // namespace mcppalloc

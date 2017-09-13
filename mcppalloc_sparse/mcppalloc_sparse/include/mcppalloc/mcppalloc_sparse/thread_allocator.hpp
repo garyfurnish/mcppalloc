@@ -107,14 +107,16 @@ namespace mcppalloc::sparse::details
     /**
      * \brief Destroy a pointer allocated by this allocator.
      *
-     * The common reason for failure is if this allocator did not make the pointer.
+     * The common reason for failure is if this allocator did not make the
+     *pointer.
      * @return True on success, false on failure.
      **/
     bool destroy(void *v);
     /**
      * \brief Deallocate a pointer allocated by this allocator.
      *
-     * The common reason for failure is if this allocator did not make the pointer.
+     * The common reason for failure is if this allocator did not make the
+     *pointer.
      * @return True on success, false on failure.
      **/
     bool deallocate(void *v);
@@ -134,7 +136,8 @@ namespace mcppalloc::sparse::details
      **/
     void free_empty_blocks(size_t min_to_leave, bool force);
     /**
-     * \brief Return threshold destroy count for checking if should return memory to global.
+     * \brief Return threshold destroy count for checking if should return memory
+     *to global.
      **/
     auto destroy_threshold() const noexcept -> destroy_threshold_type;
     /**
@@ -142,7 +145,8 @@ namespace mcppalloc::sparse::details
      **/
     auto minimum_local_blocks() const noexcept -> uint16_t;
     /**
-     * \brief Set threshold destroy count for checking if should return memory to global.
+     * \brief Set threshold destroy count for checking if should return memory to
+     *global.
      **/
     void set_destroy_threshold(destroy_threshold_type threshold);
     /**
@@ -224,7 +228,8 @@ namespace mcppalloc::sparse::details
      **/
     global_allocator &m_allocator;
     /**
-     * \brief Threshold destroy count for checking if should return memory to global.
+     * \brief Threshold destroy count for checking if should return memory to
+     *global.
      **/
     uint16_t m_destroy_threshold = ::std::numeric_limits<uint16_t>::max();
     /**
@@ -241,7 +246,8 @@ namespace mcppalloc::sparse::details
     /**
      * \brief Minimum local blocks.
 
-     * This sets the minimum number of blocks left after returning memory to global.
+     * This sets the minimum number of blocks left after returning memory to
+    global.
     **/
     uint16_t m_minimum_local_blocks = 2;
   };
@@ -251,5 +257,5 @@ namespace mcppalloc::sparse::details
   template <typename charT, typename Traits, typename Global_Allocator, typename Allocator_Policy>
   ::std::basic_ostream<charT, Traits> &operator<<(::std::basic_ostream<charT, Traits> &os,
                                                   const thread_allocator_t<Global_Allocator, Allocator_Policy> &ta);
-}
+} // namespace mcppalloc::sparse::details
 #include "allocator.hpp"

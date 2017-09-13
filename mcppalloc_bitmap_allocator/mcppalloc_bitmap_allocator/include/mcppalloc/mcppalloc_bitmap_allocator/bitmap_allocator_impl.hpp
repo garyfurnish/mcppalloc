@@ -62,7 +62,9 @@ namespace mcppalloc::bitmap_allocator::details
   auto bitmap_allocator_t<Allocator_Policy>::_get_memory() -> bitmap_state_t *
   {
     if (mcpputil_unlikely(!m_initialized)) {
-      throw ::std::runtime_error("bitmap allocator not initialized 1817b3e2-9ce8-4c31-8f03-1ad11ac246c0");
+      throw ::std::runtime_error(
+          "bitmap allocator not initialized "
+          "1817b3e2-9ce8-4c31-8f03-1ad11ac246c0");
     }
     bitmap_state_t *ret;
     {
@@ -84,18 +86,23 @@ namespace mcppalloc::bitmap_allocator::details
   auto bitmap_allocator_t<Allocator_Policy>::initialize_thread() -> thread_allocator_type &
   {
     if (mcpputil_unlikely(!m_initialized)) {
-      throw ::std::runtime_error("bitmap allocator not initialized b6311ece-28bb-4d73-92ab-ebcd9af16c85");
+      throw ::std::runtime_error(
+          "bitmap allocator not initialized "
+          "b6311ece-28bb-4d73-92ab-ebcd9af16c85");
     }
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     const auto id = mcpputil::get_thread_id_manager().current_thread_id();
     if (static_cast<size_t>(id) >= m_thread_allocator_by_manager_id.size()) {
-      throw ::std::runtime_error("bitmap_allocator initializing invalid thread id. c0356395-8355-4c6f-9336-316111e7b1e4");
+      throw ::std::runtime_error(
+          "bitmap_allocator initializing invalid thread "
+          "id. c0356395-8355-4c6f-9336-316111e7b1e4");
     }
     auto ttla = get_ttla();
     if (ttla) {
       return *ttla;
     }
-    // static initialization could have caused this to spuriously fail, so check that.
+    // static initialization could have caused this to spuriously fail, so check
+    // that.
     {
       const auto existing = m_thread_allocators.find(::std::this_thread::get_id());
       if (existing != m_thread_allocators.end()) {
@@ -117,7 +124,9 @@ namespace mcppalloc::bitmap_allocator::details
   void bitmap_allocator_t<Allocator_Policy>::destroy_thread()
   {
     if (mcpputil_unlikely(!m_initialized)) {
-      throw ::std::runtime_error("bitmap allocator not initialized b3bd6ef8-8823-4b32-82d8-febe33351d4e");
+      throw ::std::runtime_error(
+          "bitmap allocator not initialized "
+          "b3bd6ef8-8823-4b32-82d8-febe33351d4e");
     }
     // this is outside of scope so that the lock is not held when it is destroyed.
     thread_allocator_unique_ptr_type ptr;
@@ -176,11 +185,15 @@ namespace mcppalloc::bitmap_allocator::details
   auto bitmap_allocator_t<Allocator_Policy>::get_type(type_id_t type_id) -> const bitmap_type_info_t &
   {
     if (mcpputil_unlikely(!m_initialized)) {
-      throw ::std::runtime_error("bitmap allocator not initialized 1cefc0d2-eb00-428e-b954-cacb189a9823");
+      throw ::std::runtime_error(
+          "bitmap allocator not initialized "
+          "1cefc0d2-eb00-428e-b954-cacb189a9823");
     }
     auto it = m_types.find(type_id);
     if (it == m_types.end()) {
-      throw ::std::runtime_error("mcppalloc: bitmap_allocator::get_type 8c622768-3fe5-4338-b9a3-1db6b9d2ba98");
+      throw ::std::runtime_error(
+          "mcppalloc: bitmap_allocator::get_type "
+          "8c622768-3fe5-4338-b9a3-1db6b9d2ba98");
     }
     return it->second;
   }
@@ -206,7 +219,9 @@ namespace mcppalloc::bitmap_allocator::details
   void bitmap_allocator_t<Allocator_Policy>::to_ptree(::boost::property_tree::ptree &ptree, int level) const
   {
     if (mcpputil_unlikely(!m_initialized)) {
-      throw ::std::runtime_error("bitmap allocator not initialized aef5951e-4a31-4c87-aaf2-b9b3593a94ca");
+      throw ::std::runtime_error(
+          "bitmap allocator not initialized "
+          "aef5951e-4a31-4c87-aaf2-b9b3593a94ca");
     }
     MCPPALLOC_CONCURRENCY_LOCK_GUARD(m_mutex);
     ptree.put("num_free_globals", ::std::to_string(m_free_globals.size()));
@@ -240,7 +255,9 @@ namespace mcppalloc::bitmap_allocator::details
   void bitmap_allocator_t<Allocator_Policy>::_for_all_state(Predicate &&predicate)
   {
     if (mcpputil_unlikely(!m_initialized)) {
-      throw ::std::runtime_error("bitmap allocator not initialized 93c82119-6123-4d1c-8cd9-5534221db534");
+      throw ::std::runtime_error(
+          "bitmap allocator not initialized "
+          "93c82119-6123-4d1c-8cd9-5534221db534");
     }
     MCPPALLOC_CONCURRENCY_LOCK_ASSUME(m_mutex);
     for (auto &&thread : m_thread_allocators) {
@@ -250,4 +267,4 @@ namespace mcppalloc::bitmap_allocator::details
       package_it.second.for_all(::std::forward<Predicate>(predicate));
     }
   }
-}
+} // namespace mcppalloc::bitmap_allocator::details

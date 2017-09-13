@@ -37,5 +37,5 @@ namespace mcppalloc::bitmap_allocator::details
     type_id_t m_type_id{::std::numeric_limits<type_id_t>::max()};
     uint8_t m_num_user_bits{0};
   };
-}
+} // namespace mcppalloc::bitmap_allocator::details
 #include "bitmap_type_info_impl.hpp"

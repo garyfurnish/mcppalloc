@@ -22,7 +22,10 @@ namespace mcppalloc::bitmap
   inline dynamic_bitmap_ref_t<is_const> &dynamic_bitmap_ref_t<is_const>::deep_copy(const dynamic_bitmap_ref_t<is_const> &rhs)
   {
     if (mcpputil_unlikely(rhs.size() != size())) {
-      throw ::std::runtime_error("mcppalloc: dynamic_bitmap_ref_t: bad operator=: 19f0d9b7-200f-46ae-9b73-9b874ed11045");
+      throw ::std::runtime_error(
+          "mcppalloc: dynamic_bitmap_ref_t: bad "
+          "operator=: "
+          "19f0d9b7-200f-46ae-9b73-9b874ed11045");
     }
     for (size_t i = 0; i < rhs.size(); ++i) {
       m_array[i] = rhs.m_array[i];
@@ -239,7 +242,7 @@ namespace mcppalloc::bitmap
       }
     }
     /*      for (size_t i = first_set(); i < limit; ++i) {
-if (get_bit(i))
+  if (get_bit(i))
   func(i);
   }*/
   }
@@ -264,4 +267,4 @@ if (get_bit(i))
     }
     return dynamic_bitmap_ref_t<false>(new_array, array_size);
   }
-}
+} // namespace mcppalloc::bitmap

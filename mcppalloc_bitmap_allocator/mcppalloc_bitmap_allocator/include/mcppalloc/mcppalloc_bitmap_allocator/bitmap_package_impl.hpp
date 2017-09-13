@@ -84,7 +84,9 @@ namespace mcppalloc::bitmap_allocator::details
   {
     using namespace mcpputil::literals;
     if (mcpputil_unlikely(id >= cs_num_vectors)) {
-      throw ::std::runtime_error("bitmap package state id exceeds number possible 9b95cfb2-fa7d-4878-9cd7-cab0bc87b321");
+      throw ::std::runtime_error(
+          "bitmap package state id exceeds number "
+          "possible 9b95cfb2-fa7d-4878-9cd7-cab0bc87b321");
     }
     bitmap_state_t state;
     state.m_internal.m_info = bitmap_state_info_t{
@@ -166,4 +168,4 @@ namespace mcppalloc::bitmap_allocator::details
       }
     }
   }
-}
+} // namespace mcppalloc::bitmap_allocator::details

@@ -101,5 +101,5 @@ namespace mcppalloc::bitmap
   inline auto make_dynamic_bitmap_ref(dynamic_bitmap_ref_t<false>::bits_array_type array, size_t sz) noexcept;
   inline auto make_dynamic_bitmap_ref(dynamic_bitmap_ref_t<true>::bits_array_type array, size_t sz) noexcept;
   inline auto make_dynamic_bitmap_ref_from_alloca(void *memory, size_t array_size, size_t alloca_size);
-}
+} // namespace mcppalloc::bitmap
 #include "dynamic_bitmap_ref_impl.hpp"

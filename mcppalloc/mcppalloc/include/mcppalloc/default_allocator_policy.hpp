@@ -16,4 +16,4 @@ namespace mcppalloc
     static const constexpr size_type cs_minimum_alignment = 16;
     default_allocator_policy_t() = delete;
   };
-}
+} // namespace mcppalloc

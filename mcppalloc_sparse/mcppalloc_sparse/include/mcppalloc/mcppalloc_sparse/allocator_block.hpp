@@ -66,8 +66,10 @@ namespace mcppalloc
        * \brief Constructor
        * @param start Start of memory block that this allocator uses.
        * @param length Length of memory block that this allocator uses
-       * @param minimum_alloc_length Minimum length of object that can be allocated using this allocator.
-       * @param maximum_alloc_length Maximum length of object that can be allocated using this allocator.
+       * @param minimum_alloc_length Minimum length of object that can be allocated
+       *using this allocator.
+       * @param maximum_alloc_length Maximum length of object that can be allocated
+       *using this allocator.
        **/
       MCPPALLOC_ALWAYS_INLINE
       allocator_block_t(void *start, size_t length, size_t minimum_alloc_length, size_t maximum_alloc_length) noexcept;
@@ -94,8 +96,10 @@ namespace mcppalloc
        *
        * The usual cause of failure would be the pointer not being in the block.
        * @param v Pointer to destroy.
-       * @param last_collapsed_size Max size of allocation made available by destroying.
-       * @param last_max_alloc_available Return the previous last max alloc available.
+       * @param last_collapsed_size Max size of allocation made available by
+       *destroying.
+       * @param last_max_alloc_available Return the previous last max alloc
+       *available.
        * @return True on success, false on failure.
        **/
       bool destroy(void *v, size_t &last_collapsed_size, size_t &last_max_alloc_available);
@@ -192,6 +196,6 @@ namespace mcppalloc
       m_end = nullptr;
       m_start = nullptr;
     }
-  }
-}
+  } // namespace sparse::details
+} // namespace mcppalloc
 #include "allocator_block_impl.hpp"

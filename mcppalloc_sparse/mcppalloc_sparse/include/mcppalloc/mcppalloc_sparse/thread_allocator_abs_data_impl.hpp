@@ -26,6 +26,6 @@ namespace mcppalloc
       {
         m_max_blocks_before_recycle = blocks;
       }
-    }
-  }
-}
+    } // namespace details
+  }   // namespace sparse
+} // namespace mcppalloc

@@ -98,7 +98,8 @@ namespace mcppalloc::sparse::details
       abs_data.set_allocator_multiple(static_cast<uint32_t>(allocator_multiple));
       // use a nice default number of blocks before recycling.
       abs_data.set_max_blocks_before_recycle(5);
-      // based on the numbers we use for multiple, generate min and max allocation sizes.
+      // based on the numbers we use for multiple, generate min and max allocation
+      // sizes.
       size_t min = static_cast<size_t>(1) << (i + 3);
       size_t max = (static_cast<size_t>(1) << (i + 4)) - 1;
       if (i == c_bins - 1) {
@@ -256,13 +257,16 @@ namespace mcppalloc::sparse::details
       success = _add_allocator_block(id, size, try_expand);
     }
     if (!success) {
-      ::std::cerr << "mcppalloc: Out of memory, aborting 09c30c8d-2cfa-4646-a562-24f06560fa5c\n" << ::std::endl;
+      ::std::cerr << "mcppalloc: Out of memory, aborting "
+                     "09c30c8d-2cfa-4646-a562-24f06560fa5c\n"
+                  << ::std::endl;
       ::std::terminate();
     }
     ret = m_allocators[id].allocate(size);
     if (mcpputil_unlikely(!allocation_valid(ret))) // should be impossible.
     {
-      ::std::cerr << "mcppalloc: Allocation failed in an impossible fashion.  6bfbf787-3443-47c5-8726-e49d7836315a\n";
+      ::std::cerr << "mcppalloc: Allocation failed in an impossible fashion.  "
+                     "6bfbf787-3443-47c5-8726-e49d7836315a\n";
       ::std::terminate();
     }
     m_allocator.thread_policy().on_allocation(get_allocated_memory(ret), get_allocated_size(ret));
@@ -415,4 +419,4 @@ namespace mcppalloc::sparse::details
     ::boost::property_tree::json_parser::write_json(ss, ptree);
     return ss.str();
   }
-}
+} // namespace mcppalloc::sparse::details

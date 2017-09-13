@@ -4,7 +4,8 @@
 namespace mcppalloc::sparse::details
 {
   /**
-   * \brief Structure used to store data about an allocation block in an allocator.
+   * \brief Structure used to store data about an allocation block in an
+   *allocator.
    **/
   template <typename Global_Allocator>
   struct allocator_block_handle_t {
@@ -42,7 +43,8 @@ namespace mcppalloc::sparse::details
     /**
      * \brief Start location of block data.
      *
-     * Since allocator_blocks may be temporarily inconsistent during a move operation, we cash their beginning location.
+     * Since allocator_blocks may be temporarily inconsistent during a move
+     *operation, we cash their beginning location.
      **/
     uint8_t *m_begin;
   };
@@ -53,4 +55,4 @@ namespace mcppalloc::sparse::details
     os << "(" << abh.m_thread_allocator << "," << abh.m_block << "," << static_cast<void *>(abh.m_begin) << ")";
     return os;
   }
-}
+} // namespace mcppalloc::sparse::details

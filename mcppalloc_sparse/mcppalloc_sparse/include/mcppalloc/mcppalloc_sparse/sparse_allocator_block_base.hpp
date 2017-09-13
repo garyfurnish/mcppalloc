@@ -31,11 +31,12 @@ namespace mcppalloc::sparse::details
      **/
     bool valid() const noexcept;
     /**
-     * \brief Return false if items are allocated.  Otherwise may return true or false.
+     * \brief Return false if items are allocated.  Otherwise may return true or
+     *false.
      *
      * Return true if no items allocated.
-     * Return false if items are allocated or if no items are allocated and a collection is needed.
-     * Note the semantics here!
+     * Return false if items are allocated or if no items are allocated and a
+     *collection is needed. Note the semantics here!
      **/
     bool empty() const noexcept;
     /**
@@ -179,4 +180,4 @@ namespace mcppalloc::sparse::details
   {
     return static_cast<State_Type *>(find_address(addr));
   }
-}
+} // namespace mcppalloc::sparse::details

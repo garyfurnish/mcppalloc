@@ -111,7 +111,8 @@ namespace mcppalloc::sparse::details
     if (mcpputil_unlikely(!allocation_valid(ret))) {
       // this shouldn't happen
       // so memory corruption, abort.
-      ::std::cerr << " ABS failed to allocate, logic error/memory corruption. 6b758a2e-981f-440d-8107-78269157bc44"
+      ::std::cerr << " ABS failed to allocate, logic error/memory corruption. "
+                     "6b758a2e-981f-440d-8107-78269157bc44"
                   << "\n";
       ::std::cerr << "was trying to allocate bytes: " << sz << "\n";
       ::std::cerr << "min/max allocation sizes: (" << allocator_min_size() << ", " << allocator_max_size() << ")\n";
@@ -176,8 +177,8 @@ namespace mcppalloc::sparse::details
             *(ub - 1) = pair;
             // don't move at all, life made easy.
           } else if (ab_it2 < ub) {
-            // ab_it2 and ub-1 swap places while maintaing ordering of stuff inbetween them.
-            // rotate is optimal over erase/insert.
+            // ab_it2 and ub-1 swap places while maintaing ordering of stuff
+            // inbetween them. rotate is optimal over erase/insert.
 
             ::std::rotate(ab_it2, ab_it2 + 1, ub);
             (ub - 1)->first = pair.first;
@@ -224,8 +225,10 @@ namespace mcppalloc::sparse::details
       unlock_func();
       // if moved on emplacement.
       if (mcpputil_unlikely(&m_blocks.front() != bbegin)) {
-        // this should not happen, if it does the world is inconsistent and everything can only end with memory corruption.
-        ::std::cerr << "ABS blocks moved on emplacement da5093bb-c344-46c6-93c6-2845d94931da\n";
+        // this should not happen, if it does the world is inconsistent and
+        // everything can only end with memory corruption.
+        ::std::cerr << "ABS blocks moved on emplacement "
+                       "da5093bb-c344-46c6-93c6-2845d94931da\n";
         ::std::abort();
       }
       for (auto &&pair : m_available_blocks) {
@@ -304,7 +307,8 @@ namespace mcppalloc::sparse::details
   template <typename Allocator_Policy>
   bool allocator_block_set_t<Allocator_Policy>::add_block_is_safe() const
   {
-    // If capacity is equal to size then adding a block will trigger a reallocation of the internal vector.
+    // If capacity is equal to size then adding a block will trigger a
+    // reallocation of the internal vector.
     return m_blocks.capacity() != m_blocks.size();
   }
   template <typename Allocator_Policy>
@@ -390,7 +394,8 @@ namespace mcppalloc::sparse::details
       L &&l, Lock_Functional &&lock_func, Unlock_Functional &&unlock_func, Move_Functional &&move_func, size_t min_to_leave)
   {
     sparse_allocator_block_set_verifier_t::verify_all(*this);
-    // this looks really complicated but it is actually quite light weight since blocks are tiny and everything is contiguous.
+    // this looks really complicated but it is actually quite light weight since
+    // blocks are tiny and everything is contiguous.
     size_t num_empty = 0;
     // first we collect and see how many total empty blocks there are.
     for (auto &block : m_blocks) {
@@ -447,4 +452,4 @@ namespace mcppalloc::sparse::details
     ptree.put("num_available_blocks", ::std::to_string(m_available_blocks.size()));
     ptree.put("last_block_null", ::std::to_string(m_last_block == nullptr));
   }
-}
+} // namespace mcppalloc::sparse::details

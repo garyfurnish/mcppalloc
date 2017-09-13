@@ -9,4 +9,4 @@ namespace mcppalloc
   struct allocator_policy_tag_t {
   public:
   };
-}
+} // namespace mcppalloc

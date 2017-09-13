@@ -100,8 +100,9 @@ namespace mcppalloc::sparse::details
     if (!m_free_list.empty()) {
       // do a reverse search from back of free list for somewhere to put the data.
       // we don't have time to do an exhaustive search.
-      // also deleting an item from the free list could involve lots of copying if at beginning of list.
-      // finally free list is a vector so this should be cache friendly.
+      // also deleting an item from the free list could involve lots of copying if
+      // at beginning of list. finally free list is a vector so this should be
+      // cache friendly.
       for (auto it = m_free_list.rbegin(); it != m_free_list.rend(); ++it) {
         object_state_type *const state = static_cast<object_state_type *>(*it);
         state->verify_magic();
@@ -117,7 +118,8 @@ namespace mcppalloc::sparse::details
         object_state_type *const next = reinterpret_cast<object_state_type *>(reinterpret_cast<uint8_t *>(state) + size);
         // see if we can split the memory.
         if (reinterpret_cast<uint8_t *>(next) + m_minimum_alloc_length <= reinterpret_cast<uint8_t *>(state->next())) {
-          // if we are here, the memory left over is bigger then minimum alloc size, so split.
+          // if we are here, the memory left over is bigger then minimum alloc
+          // size, so split.
           next->set_all(state->next(), false, state->next_valid());
 
           assert(next->object_size() >=
@@ -357,7 +359,8 @@ namespace mcppalloc::sparse::details
     ptree.put("this", ::std::to_string(reinterpret_cast<uintptr_t>(this)));
     ptree.put("valid", ::std::to_string(valid()));
     ptree.put("last_max_alloc_available", ::std::to_string(last_max_alloc_available()));
-    //      ptree.put("max_alloc_available", ::std::to_string(max_alloc_available()));
+    //      ptree.put("max_alloc_available",
+    //      ::std::to_string(max_alloc_available()));
     ptree.put("secondary_memory_used", ::std::to_string(secondary_memory_used()));
     ptree.put("memory_size", ::std::to_string(memory_size()));
     ptree.put("full", ::std::to_string(full()));
@@ -381,4 +384,4 @@ namespace mcppalloc::sparse::details
     // check for magic constant validity.
     return user_data->is_magic_constant_valid();
   }
-}
+} // namespace mcppalloc::sparse::details

@@ -199,7 +199,8 @@ namespace mcppalloc::bitmap_allocator::details
       if (mcpputil_likely(retries < 15)) {
         goto RESTART;
       } else {
-        ::std::cerr << "mcppalloc: bitmap_state terminating due to allocation failure 0b3fb7a6-7270-45e3-a1cf-da341de0ccfb\n";
+        ::std::cerr << "mcppalloc: bitmap_state terminating due to allocation "
+                       "failure 0b3fb7a6-7270-45e3-a1cf-da341de0ccfb\n";
         ::std::abort();
       }
     }
@@ -304,7 +305,8 @@ namespace mcppalloc::bitmap_allocator::details
   inline auto bitmap_state_t::user_bits_checked(size_t i) noexcept -> bits_array_type *
   {
     if (mcpputil_unlikely(i >= m_internal.m_info.m_num_user_bit_fields)) {
-      ::std::cerr << "mcppalloc: User bits out of range: 224f26b3-d2e6-47f3-b6de-6a4194750242";
+      ::std::cerr << "mcppalloc: User bits out of range: "
+                     "224f26b3-d2e6-47f3-b6de-6a4194750242";
       ::std::terminate();
     }
     return user_bits(i);
@@ -312,7 +314,8 @@ namespace mcppalloc::bitmap_allocator::details
   inline auto bitmap_state_t::user_bits_checked(size_t i) const noexcept -> const bits_array_type *
   {
     if (mcpputil_unlikely(i >= m_internal.m_info.m_num_user_bit_fields)) {
-      ::std::cerr << "mcppalloc: User bits out of range: 24a934d1-160f-4bfc-b765-e0e21ee69605";
+      ::std::cerr << "mcppalloc: User bits out of range: "
+                     "24a934d1-160f-4bfc-b765-e0e21ee69605";
       ::std::terminate();
     }
     return user_bits(i);
@@ -347,7 +350,8 @@ namespace mcppalloc::bitmap_allocator::details
   {
 #ifdef _DEBUG
     if (mcpputil_unlikely(!has_valid_magic_numbers())) {
-      ::std::cerr << "mcppalloc: bitmap_state: invalid magic numbers 027e8d50-8555-4e7f-93a7-4d048b506436\n";
+      ::std::cerr << "mcppalloc: bitmap_state: invalid magic numbers "
+                     "027e8d50-8555-4e7f-93a7-4d048b506436\n";
       ::std::abort();
     }
 #endif
@@ -356,4 +360,4 @@ namespace mcppalloc::bitmap_allocator::details
   {
     return begin() > v;
   }
-}
+} // namespace mcppalloc::bitmap_allocator::details

@@ -22,6 +22,6 @@ namespace mcppalloc
       return block_t<Return_Allocator_Policy>{m_ptr, m_size};
     }
   };
-}
+} // namespace mcppalloc
 #include "default_allocator_policy.hpp"
 static_assert(::std::is_pod<::mcppalloc::block_t<::mcppalloc::default_allocator_policy_t<::std::allocator<void>>>>::value, "");

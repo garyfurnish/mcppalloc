@@ -62,16 +62,19 @@ namespace mcppalloc
     };
     static_assert(sizeof(user_data_base_t) % sizeof(user_data_alignment_t) == 0, "");
     /**
-     * \brief Return true if the object state is a valid object state, false otherwise.
+     * \brief Return true if the object state is a valid object state, false
+     *otherwise.
      *
      * Uses magic user data detection.
      * @param state State to test for validity.
-     * @param user_data_range_begin Beginning of the memory range that is a valid location for user data.
-     * @param user_data_range_end End of the memory range that is a valid location for user data.
+     * @param user_data_range_begin Beginning of the memory range that is a valid
+     *location for user data.
+     * @param user_data_range_end End of the memory range that is a valid location
+     *for user data.
      **/
     template <typename Allocator_Policy>
     inline bool is_valid_object_state(const ::mcppalloc::details::object_state_t<Allocator_Policy> *state,
                                       const uint8_t *user_data_range_begin,
                                       const uint8_t *user_data_range_end);
-  }
-}
+  } // namespace details
+} // namespace mcppalloc

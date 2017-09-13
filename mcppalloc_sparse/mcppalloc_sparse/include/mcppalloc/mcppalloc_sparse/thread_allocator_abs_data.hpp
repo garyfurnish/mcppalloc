@@ -26,7 +26,8 @@ namespace mcppalloc
          **/
         auto allocator_multiple() const noexcept -> uint32_t;
         /**
-         * \brief Return the maximum blocks allocated before recycling for this block set.
+         * \brief Return the maximum blocks allocated before recycling for this block
+         *set.
          **/
         auto max_blocks_before_recycle() const noexcept -> uint32_t;
         /**
@@ -44,11 +45,12 @@ namespace mcppalloc
          **/
         uint32_t m_allocator_multiple = 0;
         /**
-         * \brief Maximum number of blocks this abs should contain before recycling some back to global level.
+         * \brief Maximum number of blocks this abs should contain before recycling
+         *some back to global level.
          **/
         uint32_t m_max_blocks_before_recycle = 1;
       };
-    }
-  }
-}
+    } // namespace details
+  }   // namespace sparse
+} // namespace mcppalloc
 #include "thread_allocator_abs_data_impl.hpp"

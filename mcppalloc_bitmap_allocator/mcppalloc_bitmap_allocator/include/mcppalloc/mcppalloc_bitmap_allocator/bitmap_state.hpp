@@ -177,5 +177,5 @@ namespace mcppalloc::bitmap_allocator::details
   static_assert(sizeof(bitmap_state_internal_t) == c_bitmap_alignment * 2, "");
 
   extern bitmap_state_t *get_state(void *v);
-}
+} // namespace mcppalloc::bitmap_allocator::details
 #include "bitmap_state_impl.hpp"

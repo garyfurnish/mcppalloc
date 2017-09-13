@@ -44,7 +44,8 @@ namespace mcppalloc::sparse::details
 
       auto &block = *ab.second;
       if (mcpputil_unlikely(block.full())) {
-        ::std::cerr << "mcppalloc: allocator_block_set available block full. cf9583b3-28aa-436e-83fc-ddf4f2300922\n";
+        ::std::cerr << "mcppalloc: allocator_block_set available block full. "
+                       "cf9583b3-28aa-436e-83fc-ddf4f2300922\n";
         ::std::abort();
       }
       if (mcpputil_unlikely(block.last_max_alloc_available() != ab.first)) {
@@ -116,7 +117,8 @@ namespace mcppalloc::sparse::details
       {
         return;
       }
-      // make sure there are no duplicates in available blocks (since sorted, not a problem).
+      // make sure there are no duplicates in available blocks (since sorted, not
+      // a problem).
       if (mcpputil_unlikely(::std::adjacent_find(abs.m_available_blocks.begin(), abs.m_available_blocks.end()) !=
                             abs.m_available_blocks.end())) {
         ::std::cerr << "ABS CONSISTENCY ERROR aa35c18e-9bef-4602-a25a-24154153279a\n";
@@ -136,4 +138,4 @@ namespace mcppalloc::sparse::details
       }
     }
   };
-}
+} // namespace mcppalloc::sparse::details

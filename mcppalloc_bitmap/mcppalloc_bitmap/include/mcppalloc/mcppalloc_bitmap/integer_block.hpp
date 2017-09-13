@@ -4,16 +4,17 @@
 #include <type_traits>
 namespace mcppalloc::bitmap::details
 {
-  template <size_t Quads>
-  struct alignas(32) integer_block_t {
+  template <size_t Quads, size_t Alignment = 32>
+  struct alignas(Alignment) integer_block_t {
     /**
      * \brief Number of quad words in integer block.
      **/
     static constexpr const size_t cs_quad_words = Quads;
     /**
-     * \brief Mandatory alignment of integer_block_t.
+     * \brief Alignment of integer block.
      **/
-    static constexpr const size_t cs_alignment = 32;
+    static constexpr const size_t cs_alignment = Alignment;
+    static_assert(cs_alignment >= 32 && cs_alignment % 32 == 0, "Alignment must be divisible by 32.");
     using value_type = uint64_t;
 
     static_assert(cs_quad_words % 8 == 0, "Number of quad words must be divisible by 8.");
@@ -81,7 +82,8 @@ namespace mcppalloc::bitmap::details
     template <typename Func>
     void for_some_contiguous_bits_flip(size_t offset, Func &&func);
     /**
-     * \brief For bits that are set, call function on some of them, flip bits if called.
+     * \brief For bits that are set, call function on some of them, flip bits if
+     *called.
      *
      * @param offset Offset to add to function when calling.
      * @param func to call, takes a range of indexes.
@@ -96,5 +98,5 @@ namespace mcppalloc::bitmap::details
     ::std::array<value_type, cs_quad_words> m_array;
   };
   static_assert(::std::is_pod<integer_block_t<8>>::value, "");
-}
+} // namespace mcppalloc::bitmap::details
 #include "integer_block_impl.hpp"

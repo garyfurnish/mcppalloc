@@ -135,5 +135,5 @@ namespace mcppalloc
       assert(flags < 8);
       m_user_data = reinterpret_cast<size_type>(user_data()) | flags;
     }
-  }
-}
+  } // namespace details
+} // namespace mcppalloc

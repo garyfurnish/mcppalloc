@@ -32,4 +32,4 @@ namespace mcppalloc::sparse::details
       return false;
     }
   };
-}
+} // namespace mcppalloc::sparse::details

@@ -47,13 +47,15 @@ namespace mcppalloc::bitmap_allocator
        **/
       REQUIRES(!m_mutex) void destroy_thread();
       REQUIRES(!m_mutex) auto num_free_blocks() const noexcept -> size_t;
-      REQUIRES(!m_mutex) auto num_globals(size_t id, type_id_t type) const noexcept -> size_t;
+      REQUIRES(!m_mutex)
+      auto num_globals(size_t id, type_id_t type) const noexcept -> size_t;
 
       RETURN_CAPABILITY(m_mutex) auto _mutex() const noexcept -> mutex_type &;
 
       auto underlying_memory() const noexcept -> slab_allocator_type &;
 
-      // TODO: NOT SURE IF THIS SHOULD BE NO LOCK OR NOT... maybe we need to acquire it in gc?
+      // TODO: NOT SURE IF THIS SHOULD BE NO LOCK OR NOT... maybe we need to acquire
+      // it in gc?
       template <typename Predicate>
       NO_THREAD_SAFETY_ANALYSIS void _for_all_state(Predicate &&);
 
@@ -129,7 +131,8 @@ namespace mcppalloc::bitmap_allocator
       /**
        * \brief Type info for various allocation types.
        *
-       * This should not be modified after first use as it is not thread safe for writing.
+       * This should not be modified after first use as it is not thread safe for
+       *writing.
        **/
       ::boost::container::flat_map<type_id_t, bitmap_type_info_t, ::std::less<type_id_t>, types_allocator_type> m_types;
       /**
@@ -158,8 +161,8 @@ namespace mcppalloc::bitmap_allocator
        **/
       bool m_initialized{false};
     };
-  }
+  } // namespace details
   template <typename Allocator_Policy>
   using bitmap_allocator_t = details::bitmap_allocator_t<Allocator_Policy>;
-}
+} // namespace mcppalloc::bitmap_allocator
 #include "bitmap_allocator_impl.hpp"

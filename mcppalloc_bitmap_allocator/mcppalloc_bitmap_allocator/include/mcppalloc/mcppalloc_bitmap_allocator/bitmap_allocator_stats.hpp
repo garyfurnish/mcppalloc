@@ -19,4 +19,4 @@ namespace mcppalloc::bitmap_allocator
   {
     m_num_free_globals = num_free_globals;
   }
-}
+} // namespace mcppalloc::bitmap_allocator

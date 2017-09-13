@@ -21,10 +21,10 @@ namespace mcppalloc::sparse
      * There is a allocator block set for an interval of possible allocation sizes.
      * Each allocator block set contains allocator blocks stored linearly.
      *
-     * The allocator stores a list of global blocks that have been returned from thread allocators.
-     * These can later be reused by other threads.
-     * The allocator stores a free list of locations not used in the slab.
-     * The free list must be occasionally collected to defragment the free list.
+     * The allocator stores a list of global blocks that have been returned from
+     *thread allocators. These can later be reused by other threads. The allocator
+     *stores a free list of locations not used in the slab. The free list must be
+     *occasionally collected to defragment the free list.
      **/
     template <typename Allocator_Policy = default_allocator_policy_t<::std::allocator<void>>>
     class allocator_t
@@ -95,7 +95,8 @@ namespace mcppalloc::sparse
       /**
        * \brief Initialize the allocator.
        *
-       * Note that suggested max heap size does not guarentee the heap can expand to that size depending on platform.
+       * Note that suggested max heap size does not guarentee the heap can expand to
+       *that size depending on platform.
        * @param initial_gc_heap_size Initial size of gc heap.
        * @param max_heap_size Hint about how large the gc heap may grow.
        * @return True on success, false on failure.
@@ -114,7 +115,8 @@ namespace mcppalloc::sparse
       /**
        * \brief Get an interval of memory.
        *
-       * This does not throw an exception on error but instead returns a special value.
+       * This does not throw an exception on error but instead returns a special
+       *value.
        * @param try_expand Attempt to expand underlying slab if necessary
        * @return (nullptr,nullptr) on error.
        **/
@@ -124,7 +126,8 @@ namespace mcppalloc::sparse
        * \brief Get an interval of memory.
        *
        * Requires holding lock.
-       * This does not throw an exception on error but instead returns a special value.
+       * This does not throw an exception on error but instead returns a special
+       *value.
        * @param try_expand Try to expand underlying slab if true.
        * @return (nullptr,nullptr) on error.
        **/
@@ -168,13 +171,15 @@ namespace mcppalloc::sparse
        *
        * @param pair Memory interval to test.
        **/
-      REQUIRES(!m_mutex) auto in_free_list(const mcpputil::system_memory_range_t &pair) const noexcept -> bool;
+      REQUIRES(!m_mutex)
+      auto in_free_list(const mcpputil::system_memory_range_t &pair) const noexcept -> bool;
       /**
        * \brief Return length of free list.
        **/
       REQUIRES(!m_mutex) auto free_list_length() const noexcept -> size_t;
       /**
-       * \brief Instead of destroying a block that is still in use, release to global allocator control.
+       * \brief Instead of destroying a block that is still in use, release to
+       *global allocator control.
        *
        * @param block Block to release.
        **/
@@ -211,11 +216,12 @@ namespace mcppalloc::sparse
       /**
        * \brief Move registered allocator blocks by iteration.
        *
-       * The right way to think about this as moving a container to a new memory address.
-       * Requires holding lock.
+       * The right way to think about this as moving a container to a new memory
+       *address. Requires holding lock.
        * @param begin Start iterator.
        * @param end End iterator.
-       * @param offset New container is offset from old container (so positive for old is at a smaller memory address).
+       * @param offset New container is offset from old container (so positive for
+       *old is at a smaller memory address).
        **/
       template <typename Iterator>
       void _u_move_registered_blocks(const Iterator &begin, const Iterator &end, ptrdiff_t offset) REQUIRES(m_mutex);
@@ -225,7 +231,8 @@ namespace mcppalloc::sparse
        *
        * Requires holding lock.
        * @param blocks New container reference.
-       * @param offset New container is offset from old container (so positive for old is at a smaller memory address).
+       * @param offset New container is offset from old container (so positive for
+       *old is at a smaller memory address).
        **/
       template <typename Container>
       void _u_move_registered_blocks(Container &blocks, ptrdiff_t offset) REQUIRES(m_mutex);
@@ -247,7 +254,8 @@ namespace mcppalloc::sparse
        * Note that another thread could move the allocator block.
        * However, this can't happen without registering another block.
        * Therefore, the handle is only valid during this lock.
-       * It is important to note this does not throw on error.  Instead it returns nullptr.
+       * It is important to note this does not throw on error.  Instead it returns
+       *nullptr.
        * @param addr Address of allocated memory to find.
        * @return nullptr on error.
        **/
@@ -383,8 +391,8 @@ namespace mcppalloc::sparse
       /**
        * \brief Return an allocator block.
        *
-       * This function does actual creation of block without any sort of registartion.
-       * Requires holding lock.
+       * This function does actual creation of block without any sort of
+       *registartion. Requires holding lock.
        * @param sz Size of block requested.
        * @param minimum_alloc_length Minimum allocation length for block.
        * @param maximum_alloc_length Maximum allocation length for block.
@@ -413,8 +421,9 @@ namespace mcppalloc::sparse
       /**
        * \brief Internal helper function for moving registered blocks.
        *
-       * This function moves existing blocks in m_blocks to a new appropriate location.
-       * This saves the number of searches required from O(num blocks) to O(sets of contiguous blocks).
+       * This function moves existing blocks in m_blocks to a new appropriate
+       *location. This saves the number of searches required from O(num blocks) to
+       *O(sets of contiguous blocks).
        * @param num_contiguous Number of contiguous blocks.
        * @param new_location Beginning of new location of blocks on outside.
        * @param lb Lower bound where the blocks are currently in m_blocks.
@@ -424,7 +433,8 @@ namespace mcppalloc::sparse
           REQUIRES(m_mutex);
 
       /**
-       * \brief Unregister a registered allocator block before moving/destruction without locking.
+       * \brief Unregister a registered allocator block before moving/destruction
+       *without locking.
        *
        * @param ta Requesting thread allocator.
        * @param block Block to unregister.
@@ -437,7 +447,8 @@ namespace mcppalloc::sparse
       /**
        * \brief This is set during destruction.
        *
-       * Certain features of the allocator need to behave differently during destruction.
+       * Certain features of the allocator need to behave differently during
+       *destruction.
        **/
       std::atomic<bool> m_shutdown{false};
       /**
@@ -465,13 +476,15 @@ namespace mcppalloc::sparse
        **/
       mcpputil::slab_t m_slab;
       /**
-       * \brief Type that is an owning pointer to a thread allocator that uses the control allocator to handle memory.
+       * \brief Type that is an owning pointer to a thread allocator that uses the
+       *control allocator to handle memory.
        **/
       using thread_allocator_unique_ptr_t =
           typename ::std::unique_ptr<this_thread_allocator_t,
                                      typename mcpputil::mcpputil_allocator_deleter_t<this_thread_allocator_t, allocator>::type>;
       /**
-       * \brief Type that is a map for thread allocators that uses the control allocator to handle memory.
+       * \brief Type that is a map for thread allocators that uses the control
+       *allocator to handle memory.
        **/
       using ta_map_allocator_t = typename allocator::template rebind<
           typename ::std::pair<typename ::std::thread::id, thread_allocator_unique_ptr_t>>::other;
@@ -484,9 +497,10 @@ namespace mcppalloc::sparse
       /**
        * \brief Vector type for storing blocks held by the global allocator.
        *
-       * This holds blocks that have active memory in them that have been returned by thread allocators.
-       * The most common reason for this is that the thread alllocators have terminated.
-       * This uses the control allocator for control memory.
+       * This holds blocks that have active memory in them that have been returned
+       *by thread allocators. The most common reason for this is that the thread
+       *alllocators have terminated. This uses the control allocator for control
+       *memory.
        **/
       global_block_vector_type m_global_blocks;
       /**
@@ -524,9 +538,9 @@ namespace mcppalloc::sparse
        **/
       auto _ud_global_blocks() -> global_block_vector_type &;
     };
-  }
+  } // namespace details
   template <typename Allocator_Policy = default_allocator_policy_t<::std::allocator<void>>>
   using allocator_t = details::allocator_t<Allocator_Policy>;
-}
+} // namespace mcppalloc::sparse
 #include "allocator_impl.hpp"
 #include "thread_allocator_impl.hpp"

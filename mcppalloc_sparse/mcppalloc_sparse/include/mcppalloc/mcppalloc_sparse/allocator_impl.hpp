@@ -162,7 +162,8 @@ namespace mcppalloc::sparse::details
                                                                           allocator_block_type &out_block,
                                                                           bool try_expand)
   {
-    // first check to see if we can find a partially used block that fits parameters.
+    // first check to see if we can find a partially used block that fits
+    // parameters.
     auto found_block = _u_find_global_allocator_block(allocate_size, minimum_alloc_length, maximum_alloc_length);
     if (found_block != m_global_blocks.end()) {
       // reuse old block.
@@ -267,8 +268,11 @@ namespace mcppalloc::sparse::details
       // erase if found.
       m_blocks.erase(lb);
     } else {
-      // This should never happen, so memory corruption issue if it has, so kill the program.
-      ::std::cerr << "Unable to find allocator block to unregister e5471709-3eae-43bf-bdd9-86ba9064f103\n" << ::std::endl;
+      // This should never happen, so memory corruption issue if it has, so kill
+      // the program.
+      ::std::cerr << "Unable to find allocator block to unregister "
+                     "e5471709-3eae-43bf-bdd9-86ba9064f103\n"
+                  << ::std::endl;
       ::std::abort();
     }
     sparse_allocator_verifier_t::verify_blocks_sorted(*this);
@@ -382,15 +386,19 @@ namespace mcppalloc::sparse::details
         _u_move_registered_blocks_contiguous(1, new_block, lb);
       } else {
         // Uniqueness of block failed.
-        ::std::cerr << "MCPPALLOC: Unable to find block to move. 1b455b54-e6b2-4f5e-9f1c-957012dfddc5\n";
+        ::std::cerr << "MCPPALLOC: Unable to find block to move. "
+                       "1b455b54-e6b2-4f5e-9f1c-957012dfddc5\n";
         ::std::cerr << old_block << " " << new_block << ::std::endl;
-        // This should never happen, so memory corruption issue if it has, so kill the program.
+        // This should never happen, so memory corruption issue if it has, so kill
+        // the program.
         ::std::abort();
       }
     } else {
       // couldn't find old block
-      ::std::cerr << "MCPPALLOC: Unable to find block to move, lb is end. e2c0011f-52fa-4f86-886e-b9b932cc0cb3\n";
-      // This should never happen, so memory corruption issue if it has, so kill the program.
+      ::std::cerr << "MCPPALLOC: Unable to find block to move, lb is end. "
+                     "e2c0011f-52fa-4f86-886e-b9b932cc0cb3\n";
+      // This should never happen, so memory corruption issue if it has, so kill
+      // the program.
       ::std::abort();
     }
   }
@@ -453,7 +461,8 @@ namespace mcppalloc::sparse::details
   {
     sparse_allocator_verifier_t::verify_blocks_sorted(*this);
     ;
-    // if the interval is at the end of the currently used part of slab, just move slab pointer.
+    // if the interval is at the end of the currently used part of slab, just move
+    // slab pointer.
     if (pair.end() == m_current_end) {
       m_current_end = pair.begin();
       assert(m_current_end <= m_slab.end());
@@ -761,4 +770,4 @@ namespace mcppalloc::sparse::details
   {
     return m_maximum_heap_size;
   }
-}
+} // namespace mcppalloc::sparse::details

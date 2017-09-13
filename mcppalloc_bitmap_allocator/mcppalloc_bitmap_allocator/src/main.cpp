@@ -6,5 +6,5 @@ namespace mcppalloc::bitmap_allocator
   __declspec(dllexport) void force_import()
   {
   }
-}
+} // namespace mcppalloc::bitmap_allocator
 #endif

@@ -21,7 +21,8 @@ namespace mcppalloc::slab_allocator::details
    * This is essentially a thin layer over slab.
    * It is required that the lock not be held for reenterancy to be true.
    * It differs from allocator_t in that this allocator is completely in place.
-   * This is both less memory and runtime efficient, but can be used to back the allocator_t.
+   * This is both less memory and runtime efficient, but can be used to back the
+   *allocator_t.
    **/
   class MCPPALLOC_SLAB_ALLOCATOR_DLL_PUBLIC slab_allocator_t
   {
@@ -207,4 +208,4 @@ namespace mcppalloc::slab_allocator::details
   {
     return _u_object_current_end() == _u_object_begin();
   }
-}
+} // namespace mcppalloc::slab_allocator::details

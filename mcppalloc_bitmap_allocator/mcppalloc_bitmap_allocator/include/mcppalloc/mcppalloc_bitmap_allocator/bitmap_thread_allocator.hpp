@@ -65,5 +65,5 @@ namespace mcppalloc::bitmap_allocator::details
     size_t m_max_free{5};
     bool m_in_destructor{false};
   };
-}
+} // namespace mcppalloc::bitmap_allocator::details
 #include "bitmap_thread_allocator_impl.hpp"

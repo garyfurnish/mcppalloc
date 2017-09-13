@@ -15,7 +15,8 @@ namespace mcppalloc
     class object_state_base_t;
     class user_data_base_t;
     /**
-     * \brief All object_state_t must be at least c_align_pow2 aligned, so test that.
+     * \brief All object_state_t must be at least c_align_pow2 aligned, so test
+     *that.
      **/
     template <typename Allocator_Policy>
     bool is_aligned_properly(const object_state_base_t *os) noexcept;
@@ -29,7 +30,8 @@ namespace mcppalloc
 
       static const constexpr size_type cs_alignment = 16;
       /**
-       * \brief Return the total size needed for an allocation of object state of sz with header_sz.
+       * \brief Return the total size needed for an allocation of object state of sz
+       *with header_sz.
        **/
       static size_type needed_size(size_type header_sz, size_type sz, size_type alignment = cs_alignment)
       {
@@ -41,11 +43,13 @@ namespace mcppalloc
         return mcpputil::align(header_sz, alignment) + mcpputil::align(sz, alignment);
       }
       /**
-       * \brief Return the address of the object_state from the allocated object memory.
+       * \brief Return the address of the object_state from the allocated object
+       *memory.
        **/
       static object_state_base_t *from_object_start(void *v, size_type alignment = cs_alignment) noexcept;
       /**
-       * \brief Return the address of the object_state from the allocated object memory.
+       * \brief Return the address of the object_state from the allocated object
+       *memory.
        **/
       template <typename Object_State_Type>
       static Object_State_Type *from_object_start(void *v, size_type alignment = cs_alignment) noexcept;
@@ -58,23 +62,28 @@ namespace mcppalloc
        **/
       void set_in_use(bool v) noexcept;
       /**
-       * \brief Return false if the memory associated with this state is available for use, true otherwise.
+       * \brief Return false if the memory associated with this state is available
+       *for use, true otherwise.
        **/
       bool not_available() const noexcept;
       /**
-       * \brief Return true if the memory associated with this state is in use, false otherwise.
+       * \brief Return true if the memory associated with this state is in use,
+       *false otherwise.
        **/
       bool in_use() const noexcept;
       /**
-       * \brief Return true if the memory associated with this state has been freed by another thread, but not processed yet.
+       * \brief Return true if the memory associated with this state has been freed
+       *by another thread, but not processed yet.
        **/
       bool quasi_freed() const noexcept;
       /**
-       * \brief Set that the memory associated with this state has been freed by another thread but not processed yet.
+       * \brief Set that the memory associated with this state has been freed by
+       *another thread but not processed yet.
        **/
       void set_quasi_freed() noexcept;
       /**
-       * \brief Set that the memory associated with this state has been freed by another thread but not processed yet.
+       * \brief Set that the memory associated with this state has been freed by
+       *another thread but not processed yet.
        **/
       void set_quasi_freed(bool val) noexcept;
       /**
@@ -140,7 +149,8 @@ namespace mcppalloc
        * Description is in little endian.
        * 0th bit is in_use
        * 1st bit is next_valid
-       * 2nd bit is quasi-freed (allocator intends for free to happen during collect).
+       * 2nd bit is quasi-freed (allocator intends for free to happen during
+       *collect).
        **/
       uintptr_type m_next;
       /**
@@ -179,6 +189,6 @@ namespace mcppalloc
         return false;
       }
     };
-  }
-}
+  } // namespace details
+} // namespace mcppalloc
 #include "object_state_impl.hpp"

@@ -113,5 +113,5 @@ namespace mcppalloc::bitmap_allocator::details
      **/
     type_id_t m_type_id;
   };
-}
+} // namespace mcppalloc::bitmap_allocator::details
 #include "bitmap_package_impl.hpp"

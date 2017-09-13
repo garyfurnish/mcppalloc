@@ -21,4 +21,4 @@ namespace mcppalloc::bitmap_allocator::details
   {
     m_num_user_bits = num_user_bits;
   }
-}
+} // namespace mcppalloc::bitmap_allocator::details

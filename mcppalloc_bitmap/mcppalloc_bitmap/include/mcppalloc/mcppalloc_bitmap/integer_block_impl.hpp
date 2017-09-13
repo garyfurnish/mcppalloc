@@ -7,26 +7,27 @@
 #include <numeric>
 namespace mcppalloc::bitmap::details
 {
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE void integer_block_t<Quads>::clear() noexcept
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE void integer_block_t<Quads, Alignment>::clear() noexcept
   {
     ::std::fill(m_array.begin(), m_array.end(), 0);
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE void integer_block_t<Quads>::fill(uint64_t word) noexcept
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE void integer_block_t<Quads, Alignment>::fill(uint64_t word) noexcept
   {
     ::std::fill(m_array.begin(), m_array.end(), word);
   }
 
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE void integer_block_t<Quads>::set_bit(size_t i, bool value) noexcept
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE void integer_block_t<Quads, Alignment>::set_bit(size_t i, bool value) noexcept
   {
     auto pos = i / 64;
     auto sub_pos = i - (pos * 64);
     m_array[pos] = (m_array[pos] & (~(1ll << sub_pos))) | (static_cast<size_t>(value) << sub_pos);
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE void integer_block_t<Quads>::set_bit_atomic(size_t i, bool value, ::std::memory_order ordering) noexcept
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE void
+  integer_block_t<Quads, Alignment>::set_bit_atomic(size_t i, bool value, ::std::memory_order ordering) noexcept
   {
     auto pos = i / 64;
     auto sub_pos = i - (pos * 64);
@@ -38,23 +39,24 @@ namespace mcppalloc::bitmap::details
       success = bits.compare_exchange_weak(cur, new_val, ordering);
     }
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::get_bit(size_t i) const noexcept -> bool
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::get_bit(size_t i) const noexcept -> bool
   {
     auto pos = i / 64;
     auto sub_pos = i - (pos * 64);
     return (m_array[pos] & (1ll << sub_pos)) > sub_pos;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE bool integer_block_t<Quads>::get_bit_atomic(size_t i, ::std::memory_order ordering) const noexcept
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE bool integer_block_t<Quads, Alignment>::get_bit_atomic(size_t i, ::std::memory_order ordering) const
+      noexcept
   {
     auto pos = i / 64;
     auto sub_pos = i - (pos * 64);
     auto &bits = mcpputil::unsafe_reference_cast<::std::atomic<uint64_t>>(m_array[pos]);
     return (bits.load(ordering) & (1ll << sub_pos)) > sub_pos;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::all_set() const noexcept -> bool
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::all_set() const noexcept -> bool
   {
     for (auto &&val : m_array) {
       if (val != ::std::numeric_limits<value_type>::max()) {
@@ -63,8 +65,8 @@ namespace mcppalloc::bitmap::details
     }
     return true;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::any_set() const noexcept -> bool
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::any_set() const noexcept -> bool
   {
     for (auto &&it : m_array) {
       if (it) {
@@ -73,8 +75,8 @@ namespace mcppalloc::bitmap::details
     }
     return false;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::none_set() const noexcept -> bool
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::none_set() const noexcept -> bool
   {
     for (auto &&it : m_array) {
       if (it) {
@@ -83,8 +85,8 @@ namespace mcppalloc::bitmap::details
     }
     return true;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::first_set() const noexcept -> size_t
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::first_set() const noexcept -> size_t
   {
 #if defined(__AVX__) && !defined(__APPLE__)
     __m256i m = *mcpputil::unsafe_cast<__m256i>(&m_array[0]);
@@ -123,19 +125,19 @@ namespace mcppalloc::bitmap::details
 #endif
     return ::std::numeric_limits<size_t>::max();
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::first_not_set() const noexcept -> size_t
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::first_not_set() const noexcept -> size_t
   {
     return (~*this).first_set();
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::popcount() const noexcept -> size_t
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::popcount() const noexcept -> size_t
   {
     return ::std::accumulate(m_array.begin(), m_array.end(), static_cast<size_t>(0),
                              [](size_t b, auto x) { return static_cast<size_t>(mcpputil::popcount(x)) + b; });
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::operator~() const noexcept -> integer_block_t
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::operator~() const noexcept -> integer_block_t
   {
     integer_block_t ret = *this;
     for (auto &&i : ret.m_array) {
@@ -143,32 +145,35 @@ namespace mcppalloc::bitmap::details
     }
     return ret;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::negate() noexcept -> integer_block_t &
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::negate() noexcept -> integer_block_t &
   {
     for (auto &&i : m_array) {
       i = ~i;
     }
     return *this;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::operator|(const integer_block_t &b) const noexcept -> integer_block_t
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::operator|(const integer_block_t &b) const noexcept
+      -> integer_block_t
   {
     integer_block_t ret;
     for (size_t i = 0; i < m_array.size(); ++i) {
       ret.m_array[i] = m_array[i] | b.m_array[i];
     }
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::operator|=(const integer_block_t &b) noexcept -> integer_block_t &
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::operator|=(const integer_block_t &b) noexcept
+      -> integer_block_t &
   {
     for (size_t i = 0; i < m_array.size(); ++i) {
       m_array[i] |= b.m_array[i];
     }
     return *this;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::operator&(const integer_block_t &b) const noexcept -> integer_block_t
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::operator&(const integer_block_t &b) const noexcept
+      -> integer_block_t
   {
     integer_block_t ret;
     for (size_t i = 0; i < m_array.size(); ++i) {
@@ -176,16 +181,18 @@ namespace mcppalloc::bitmap::details
     }
     return ret;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::operator&=(const integer_block_t &b) noexcept -> integer_block_t &
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::operator&=(const integer_block_t &b) noexcept
+      -> integer_block_t &
   {
     for (size_t i = 0; i < m_array.size(); ++i) {
       m_array[i] &= b.m_array[i];
     }
     return *this;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::operator^(const integer_block_t &b) const noexcept -> integer_block_t
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::operator^(const integer_block_t &b) const noexcept
+      -> integer_block_t
   {
     integer_block_t ret;
     for (size_t i = 0; i < m_array.size(); ++i) {
@@ -193,17 +200,18 @@ namespace mcppalloc::bitmap::details
     }
     return ret;
   }
-  template <size_t Quads>
-  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads>::operator^=(const integer_block_t &b) noexcept -> integer_block_t &
+  template <size_t Quads, size_t Alignment>
+  MCPPALLOC_ALWAYS_INLINE auto integer_block_t<Quads, Alignment>::operator^=(const integer_block_t &b) noexcept
+      -> integer_block_t &
   {
     for (size_t i = 0; i < m_array.size(); ++i) {
       m_array[i] ^= b.m_array[i];
     }
     return *this;
   }
-  template <size_t Quads>
+  template <size_t Quads, size_t Alignment>
   template <typename Func>
-  void integer_block_t<Quads>::for_set_bits(size_t offset, size_t limit, Func &&func)
+  void integer_block_t<Quads, Alignment>::for_set_bits(size_t offset, size_t limit, Func &&func)
   {
     limit = ::std::min(limit, size_in_bits());
     for (size_t i = 0; i < limit; ++i) {
@@ -216,9 +224,9 @@ namespace mcppalloc::bitmap::details
     }
   }
 
-  template <size_t Quads>
+  template <size_t Quads, size_t Alignment>
   template <typename Func>
-  void integer_block_t<Quads>::for_some_contiguous_bits_flip(size_t offset, Func &&func)
+  void integer_block_t<Quads, Alignment>::for_some_contiguous_bits_flip(size_t offset, Func &&func)
   {
 #if defined(__AVX2__) && !defined(__APPLE__)
     const __m256i ones = _mm256_set1_epi64x(-1);
@@ -245,19 +253,19 @@ namespace mcppalloc::bitmap::details
 #endif
   }
 
-  template <size_t Quads>
-  constexpr size_t integer_block_t<Quads>::size() noexcept
+  template <size_t Quads, size_t Alignment>
+  constexpr size_t integer_block_t<Quads, Alignment>::size() noexcept
   {
     return cs_quad_words;
   }
-  template <size_t Quads>
-  constexpr size_t integer_block_t<Quads>::size_in_bytes() noexcept
+  template <size_t Quads, size_t Alignment>
+  constexpr size_t integer_block_t<Quads, Alignment>::size_in_bytes() noexcept
   {
     return sizeof(m_array);
   }
-  template <size_t Quads>
-  constexpr size_t integer_block_t<Quads>::size_in_bits() noexcept
+  template <size_t Quads, size_t Alignment>
+  constexpr size_t integer_block_t<Quads, Alignment>::size_in_bits() noexcept
   {
     return size_in_bytes() * 8;
   }
-}
+} // namespace mcppalloc::bitmap::details
